@@ -1,0 +1,63 @@
+<section class="notifications-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Система</p>
+      <h1>Уведомления</h1>
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="loading-spinner">Загрузка уведомлений...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="!loading && notifications.length === 0" class="empty-state">
+    <div class="empty-icon">🔔</div>
+    <p>Нет новых уведомлений</p>
+    <small>Все уведомления будут отображаться здесь</small>
+  </div>
+
+  <div *ngIf="!loading && notifications.length > 0" class="notifications-list">
+    <div *ngFor="let notif of notifications"
+         class="notification-item"
+         [ngClass]="[getNotificationClass(notif.type), notif.read ? 'read' : 'unread']">
+      <div class="notif-icon">{{ getNotificationIcon(notif.type) }}</div>
+      <div class="notif-content">
+        <div class="notif-message">{{ notif.message }}</div>
+        <div class="notif-time">{{ formatDate(notif.timestamp) }}</div>
+      </div>
+      <div class="notif-actions">
+        <button *ngIf="!notif.read" class="mark-read-btn" (click)="markAsRead(notif)" title="Отметить как прочитанное">✓</button>
+        <button class="delete-btn" (click)="deleteNotification(notif.id)" title="Удалить">✕</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Чаты с клиентами -->
+  <div class="chat-conversations" *ngIf="conversations.length > 0">
+    <h2>Чаты с клиентами</h2>
+    <div class="conversations-list">
+      <div *ngFor="let conv of conversations" class="conversation-item" (click)="openChatWithUser(conv)">
+        <div class="conv-avatar">
+          <div class="avatar">{{ conv.userName?.charAt(0) || 'К' }}</div>
+        </div>
+        <div class="conv-info">
+          <div class="conv-name">{{ conv.userName }}</div>
+          <div class="conv-email">{{ conv.userEmail }}</div>
+          <div class="conv-last-message">{{ conv.lastMessage }}</div>
+        </div>
+        <div class="conv-badge" *ngIf="conv.unreadCount > 0">
+          {{ conv.unreadCount }}
+        </div>
+        <div class="conv-time">{{ formatDate(conv.lastMessageTime) }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Модальное окно чата -->
+<app-admin-chat-modal
+  [visible]="showChatModal"
+  [conversation]="selectedConversation"
+  (close)="closeChatModal()"
+  (messageSent)="loadConversations()"
+  (conversationDeleted)="onConversationDeleted()">
+</app-admin-chat-modal>

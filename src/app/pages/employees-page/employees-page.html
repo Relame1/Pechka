@@ -1,0 +1,350 @@
+<section class="employees-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Персонал</p>
+      <h1>Сотрудники</h1>
+    </div>
+    <button class="primary-btn" (click)="openAddModal()">
+      + Добавить сотрудника
+    </button>
+  </header>
+
+  <!-- Карточки статистики -->
+  <div class="stats-grid" *ngIf="!loading; else statsSkeleton">
+    <div class="stat-card">
+      <span>Всего сотрудников</span>
+      <strong>{{ stats.total }}</strong>
+      <small>в штате</small>
+    </div>
+    <div class="stat-card dark">
+      <span>Работают</span>
+      <strong>{{ stats.active }}</strong>
+      <small>активных</small>
+    </div>
+    <div class="stat-card">
+      <span>В отпуске</span>
+      <strong>{{ stats.onVacation }}</strong>
+      <small>временно</small>
+    </div>
+    <div class="stat-card">
+      <span>Средняя зарплата</span>
+      <strong>{{ stats.avgSalary | number:'1.0-0' }} ₽</strong>
+      <small>в месяц</small>
+    </div>
+  </div>
+  <ng-template #statsSkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of [1,2,3,4]">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Распределение по отделам -->
+  <div class="dept-stats" *ngIf="!loading && stats.departments.length > 0">
+    <div class="dept-card" *ngFor="let dept of stats.departments">
+      <span class="dept-name">{{ dept.name }}</span>
+      <span class="dept-count">{{ dept.count }} чел.</span>
+      <div class="dept-bar">
+        <div class="dept-fill" [style.width.%]="(dept.count / stats.total) * 100"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Поиск и фильтры -->
+  <div class="filters-row">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Поиск по имени, email, логину, должности..."
+        [(ngModel)]="searchQuery"
+        (input)="filterEmployees()"
+      />
+    </div>
+    <div class="role-filters">
+      <button class="filter-chip" [class.active]="selectedRole === 'all'" (click)="selectRole('all')">Все</button>
+      <button class="filter-chip" [class.active]="selectedRole === 'admin'" (click)="selectRole('admin')">Админ</button>
+      <button class="filter-chip" [class.active]="selectedRole === 'manager'" (click)="selectRole('manager')">Менеджер</button>
+      <button class="filter-chip" [class.active]="selectedRole === 'baker'" (click)="selectRole('baker')">Пекарь</button>
+    </div>
+    <div class="status-filters">
+      <button class="filter-chip" [class.active]="selectedStatus === 'all'" (click)="selectStatus('all')">Все</button>
+      <button class="filter-chip status-active" [class.active]="selectedStatus === 'active'" (click)="selectStatus('active')">Активны</button>
+      <button class="filter-chip status-vacation" [class.active]="selectedStatus === 'on_vacation'" (click)="selectStatus('on_vacation')">В отпуске</button>
+      <button class="filter-chip status-inactive" [class.active]="selectedStatus === 'inactive'" (click)="selectStatus('inactive')">Неактивны</button>
+    </div>
+  </div>
+
+  <!-- Таблица сотрудников -->
+  <div class="panel table-panel">
+    <h3>Список сотрудников</h3>
+    <div class="table-wrap" *ngIf="!loading; else tableSkeleton">
+      <table>
+        <thead>
+          <tr>
+            <th>Сотрудник</th>
+            <th>Должность</th>
+            <th>Отдел</th>
+            <th>Логин</th>
+            <th>Роль</th>
+            <th>Статус</th>
+            <th>Зарплата</th>
+            <th>Дата приёма</th>
+            <th>Телефон</th>
+            <th>Email</th>
+            <th style="width:130px">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let employee of filteredEmployees">
+            <td class="employee-name">
+              <div class="employee-avatar">{{ getInitials(employee.name) }}</div>
+              {{ employee.name }}
+             </td>
+            <td>{{ employee.position }}</td>
+            <td>{{ employee.department }}</td>
+            <td class="login-cell">{{ employee.login || '—' }}</td>
+            <td>
+              <span class="role-badge" [ngClass]="getRoleClass(employee.role)">
+                {{ getRoleLabel(employee.role) }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(employee.status)">
+                {{ getStatusLabel(employee.status) }}
+              </span>
+            </td>
+            <td class="salary">{{ employee.salary | number:'1.0-0' }} ₽</td>
+            <td>{{ employee.hireDate | date:'dd.MM.yyyy' }}</td>
+            <td>{{ employee.phone }}</td>
+            <td>{{ employee.email }}</td>
+            <td class="actions">
+              <button class="action-btn edit-btn" (click)="openEditModal(employee)" title="Редактировать">✏️</button>
+              <button class="action-btn view-btn" (click)="openViewModal(employee)" title="Просмотр">👁️</button>
+              <button class="action-btn reset-pwd-btn" (click)="resetEmployeePassword(employee)" title="Сбросить пароль">🔑</button>
+              <button class="action-btn delete-btn" (click)="deleteEmployee(employee)" title="Удалить">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredEmployees.length === 0">
+            <td colspan="11" class="empty-message">Сотрудники не найдены</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #tableSkeleton>
+      <div class="skeleton-lines">
+        <div class="skeleton-line" *ngFor="let _ of skeletonRows"></div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Модальное окно добавления/редактирования -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Редактирование сотрудника' : 'Добавление сотрудника' }}</h2>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <form [formGroup]="employeeForm" (ngSubmit)="submitForm()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>ФИО *</label>
+              <input type="text" formControlName="name" placeholder="Иванов Иван Иванович">
+              <small *ngIf="employeeForm.get('name')?.invalid && employeeForm.get('name')?.touched" class="error">Обязательное поле</small>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" formControlName="email" placeholder="ivan@pechka.ru">
+              <small *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="error">Введите корректный email</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Телефон *</label>
+              <input type="tel" formControlName="phone" placeholder="+7 (999) 123-45-67">
+              <small *ngIf="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched" class="error">Обязательное поле</small>
+            </div>
+            <div class="form-group">
+              <label>Логин для входа *</label>
+              <input type="text" formControlName="login" placeholder="ivan.petrov">
+              <small class="hint">Будет использоваться для входа в систему</small>
+              <small *ngIf="employeeForm.get('login')?.invalid && employeeForm.get('login')?.touched" class="error">Обязательное поле</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ isEditing ? 'Новый пароль' : 'Пароль *' }}</label>
+              <input type="password" formControlName="password" placeholder="********">
+              <small class="hint">{{ isEditing ? 'Оставьте пустым, чтобы не менять пароль' : 'Минимум 6 символов' }}</small>
+              <small *ngIf="employeeForm.get('password')?.invalid && employeeForm.get('password')?.touched" class="error">Минимум 6 символов</small>
+            </div>
+            <div class="form-group">
+              <label>Роль *</label>
+              <select formControlName="role">
+                <option value="admin">Администратор</option>
+                <option value="manager">Менеджер</option>
+                <option value="baker">Пекарь</option>
+                <option value="client">Клиент</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Должность *</label>
+              <input type="text" formControlName="position" placeholder="Директор">
+              <small *ngIf="employeeForm.get('position')?.invalid && employeeForm.get('position')?.touched" class="error">Обязательное поле</small>
+            </div>
+            <div class="form-group">
+              <label>Отдел *</label>
+              <select formControlName="department">
+                <option value="Управление">Управление</option>
+                <option value="Производство">Производство</option>
+                <option value="Отдел продаж">Отдел продаж</option>
+                <option value="Склад">Склад</option>
+                <option value="Бухгалтерия">Бухгалтерия</option>
+                <option value="IT-отдел">IT-отдел</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Дата приёма *</label>
+              <input type="date" formControlName="hireDate">
+              <small *ngIf="employeeForm.get('hireDate')?.invalid && employeeForm.get('hireDate')?.touched" class="error">Обязательное поле</small>
+            </div>
+            <div class="form-group">
+              <label>Зарплата (₽) *</label>
+              <input type="number" formControlName="salary" placeholder="50000" step="1000">
+              <small *ngIf="employeeForm.get('salary')?.invalid && employeeForm.get('salary')?.touched" class="error">Обязательное поле</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Статус *</label>
+              <select formControlName="status">
+                <option value="active">Активен</option>
+                <option value="on_vacation">В отпуске</option>
+                <option value="inactive">Неактивен</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Дата рождения</label>
+              <input type="date" formControlName="birthDate">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Адрес</label>
+              <input type="text" formControlName="address" placeholder="г. Москва, ул. Ленина, д.10">
+            </div>
+            <div class="form-group">
+              <label>Контактное лицо (экстр.)</label>
+              <input type="text" formControlName="emergencyContact" placeholder="Иванова Мария">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Телефон (экстр.)</label>
+              <input type="tel" formControlName="emergencyPhone" placeholder="+7 (999) 123-45-67">
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Заметки</label>
+            <textarea formControlName="notes" rows="3" placeholder="Дополнительная информация..."></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Отмена</button>
+            <button type="submit" class="submit-btn" [disabled]="isSubmitting || employeeForm.invalid">
+              {{ isSubmitting ? 'Сохранение...' : (isEditing ? 'Сохранить' : 'Добавить') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно просмотра -->
+  <div class="modal-overlay" *ngIf="showViewModal && selectedEmployee" (click)="closeViewModal()">
+    <div class="modal-content view-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Информация о сотруднике</h2>
+        <button class="close-btn" (click)="closeViewModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="employee-header">
+          <div class="employee-large-avatar">{{ getInitials(selectedEmployee.name) }}</div>
+          <div class="employee-header-info">
+            <h3>{{ selectedEmployee.name }}</h3>
+            <span class="role-badge" [ngClass]="getRoleClass(selectedEmployee.role)">{{ getRoleLabel(selectedEmployee.role) }}</span>
+            <span class="status-badge" [ngClass]="getStatusClass(selectedEmployee.status)">{{ getStatusLabel(selectedEmployee.status) }}</span>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Логин:</label>
+            <span>{{ selectedEmployee.login || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Должность:</label>
+            <span>{{ selectedEmployee.position }}</span>
+          </div>
+          <div class="info-item">
+            <label>Отдел:</label>
+            <span>{{ selectedEmployee.department }}</span>
+          </div>
+          <div class="info-item">
+            <label>Email:</label>
+            <span>{{ selectedEmployee.email }}</span>
+          </div>
+          <div class="info-item">
+            <label>Телефон:</label>
+            <span>{{ selectedEmployee.phone }}</span>
+          </div>
+          <div class="info-item">
+            <label>Дата приёма:</label>
+            <span>{{ selectedEmployee.hireDate | date:'dd.MM.yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Зарплата:</label>
+            <span>{{ selectedEmployee.salary | number:'1.0-0' }} ₽</span>
+          </div>
+          <div class="info-item" *ngIf="selectedEmployee.birthDate">
+            <label>Дата рождения:</label>
+            <span>{{ selectedEmployee.birthDate | date:'dd.MM.yyyy' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedEmployee.address">
+            <label>Адрес:</label>
+            <span>{{ selectedEmployee.address }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedEmployee.emergencyContact">
+            <label>Экстр. контакт:</label>
+            <span>{{ selectedEmployee.emergencyContact }} ({{ selectedEmployee.emergencyPhone }})</span>
+          </div>
+          <div class="info-item full-width" *ngIf="selectedEmployee.notes">
+            <label>Заметки:</label>
+            <span>{{ selectedEmployee.notes }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="edit-btn" (click)="editFromView()">Редактировать</button>
+        <button class="close-footer-btn" (click)="closeViewModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</section>

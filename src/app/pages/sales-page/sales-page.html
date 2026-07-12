@@ -1,0 +1,124 @@
+<section class="sales-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Касса</p>
+      <h1>Продажи</h1>
+    </div>
+  </header>
+
+  <div class="sales-container">
+    <!-- Левая колонка: добавление товара -->
+    <div class="add-product-panel panel">
+      <h2>Добавить товар</h2>
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Поиск по названию или артикулу"
+          [(ngModel)]="productSearch"
+        />
+      </div>
+      <div class="product-list" *ngIf="filteredProducts.length > 0">
+        <div
+          class="product-item"
+          *ngFor="let product of filteredProducts"
+          (click)="selectProduct(product.id!)"
+        >
+          <div>
+            <span class="name">{{ product.name }}</span>
+            <span class="article">{{ product.article }}</span>
+          </div>
+          <div class="price">{{ product.price | number:'1.2-2' }} ₽</div>
+        </div>
+      </div>
+      <div *ngIf="selectedProductId" class="selected-product">
+        <div class="selected-info">
+          <strong>{{
+            products.find((p) => p.id === selectedProductId)?.name
+          }}</strong>
+          <div>
+            <input
+              type="number"
+              [(ngModel)]="selectedQuantity"
+              min="0.01"
+              step="0.5"
+            />
+            <button (click)="addToCart()" class="primary-btn">Добавить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая колонка: корзина (чек) -->
+    <div class="cart-panel panel">
+      <h2>Чек</h2>
+      <div class="cart-items" *ngIf="cart.length > 0">
+        <div class="cart-item" *ngFor="let item of cart; let i = index">
+          <div class="item-info">
+            <span class="name">{{ item.product_name }}</span>
+            <span class="qty"
+              >{{ item.quantity }} {{ item.unit }} x
+              {{ item.price | number:'1.2-2' }} ₽</span
+            >
+            <span class="total">{{ item.total | number:'1.2-2' }} ₽</span>
+          </div>
+          <button class="remove-btn" (click)="removeFromCart(i)">×</button>
+        </div>
+      </div>
+      <div *ngIf="cart.length === 0" class="empty-cart">Корзина пуста</div>
+      <div class="cart-total" *ngIf="cart.length > 0">
+        <span>Итого:</span>
+        <strong>{{ total | number:'1.2-2' }} ₽</strong>
+      </div>
+      <div class="customer-field">
+        <input
+          type="text"
+          placeholder="Имя клиента (необязательно)"
+          [(ngModel)]="customerName"
+        />
+      </div>
+      <button
+        class="complete-btn"
+        (click)="completeSale()"
+        [disabled]="loading || cart.length === 0"
+      >
+        {{ loading ? "Оформление..." : "Оплатить" }}
+      </button>
+      <div *ngIf="successMessage" class="success-msg">{{ successMessage }}</div>
+    </div>
+  </div>
+
+  <!-- История продаж -->
+  <div class="history-section panel">
+    <h2>История продаж</h2>
+    <div *ngIf="loadingHistory" class="loading-history">Загрузка...</div>
+    <div *ngIf="!loadingHistory && sales.length === 0" class="empty-history">
+      Нет продаж
+    </div>
+    <div *ngIf="!loadingHistory && sales.length > 0" class="history-table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Клиент</th>
+            <th>Сумма</th>
+            <th>Позиции</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sale of sales">
+            <td>{{ sale.created_at | date : "dd.MM.yyyy HH:mm" }}</td>
+            <td>{{ sale.customer_name || "—" }}</td>
+            <td class="amount">{{ sale.total | number : "1.2-2" }} ₽</td>
+            <td class="items-list">
+              <span *ngFor="let item of sale.items; let i = index">
+                {{ item.product?.name }} ({{ item.quantity }}
+                {{ item.product?.unit || "шт" }})
+                <span *ngIf="i < (sale.items?.length || 0) - 1">, </span>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,107 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Массовое добавление ингредиентов</h3>
+      <button class="close-btn" (click)="onClose()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Фильтры -->
+      <div class="filters-row">
+        <div class="search-box">
+          <input 
+            type="text" 
+            placeholder="Поиск по названию..." 
+            [(ngModel)]="searchQuery"
+            (input)="onFilterChange()"
+          />
+        </div>
+        <div class="category-filter">
+          <select [(ngModel)]="categoryFilter" (change)="onFilterChange()">
+            <option value="all">Все категории</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+        <button class="reset-btn" (click)="resetFilters()">Сбросить</button>
+      </div>
+      
+      <!-- Таблица ингредиентов -->
+      <div class="table-wrapper" *ngIf="!isLoading; else loadingTemplate">
+        <table class="ingredients-table">
+          <thead>
+            <tr>
+              <th class="checkbox-col">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="selectAll"
+                  (change)="toggleSelectAll()"
+                />
+              </th>
+              <th>Ингредиент</th>
+              <th>Категория</th>
+              <th>Текущий остаток</th>
+              <th>Ед. изм.</th>
+              <th>Добавить</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedIngredients">
+              <td class="checkbox-col">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="item.selected"
+                  (change)="onSelectionChange()"
+                />
+              </td>
+              <td class="ingredient-name">{{ item.ingredient.name }}</td>
+              <td>{{ item.ingredient.category }}</td>
+              <td class="stock-cell">
+                <span class="current-stock">{{ item.ingredient.stock | number:'1.0-2' }}</span>
+                <span class="new-stock" *ngIf="item.selected && item.quantity > 0">
+                  → {{ getNewStock(item) | number:'1.0-2' }}
+                </span>
+              </td>
+              <td>{{ item.ingredient.unit }}</td>
+              <td class="quantity-cell">
+                <input 
+                  type="number" 
+                  class="quantity-input"
+                  [(ngModel)]="item.quantity"
+                  [disabled]="!item.selected"
+                  min="0"
+                  step="0.1"
+                  placeholder="0"
+                />
+              </td>
+            </tr>
+            <tr *ngIf="selectedIngredients.length === 0">
+              <td colspan="6" class="empty-message">Ингредиенты не найдены</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <ng-template #loadingTemplate>
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Загрузка ингредиентов...</p>
+        </div>
+      </ng-template>
+      
+      <!-- Итоги -->
+      <div class="summary" *ngIf="getSelectedCount() > 0">
+        <div class="summary-info">
+          <span>Выбрано ингредиентов: <strong>{{ getSelectedCount() }}</strong></span>
+          <span>Общее количество: <strong>{{ getTotalQuantity() | number:'1.0-2' }}</strong> ед.</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="onClose()" [disabled]="isSubmitting">Отмена</button>
+      <button class="submit-btn" (click)="submit()" [disabled]="isSubmitting || getSelectedCount() === 0">
+        {{ isSubmitting ? 'Добавление...' : 'Добавить выбранные' }}
+      </button>
+    </div>
+  </div>
+</div>

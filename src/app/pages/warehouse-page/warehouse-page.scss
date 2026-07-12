@@ -1,0 +1,298 @@
+:host {
+  --wh-bg: #f4f4f5;
+  --wh-panel: #ffffff;
+  --wh-border: #e4e4e7;
+  --wh-text: #18181b;
+  --wh-muted: #71717a;
+  --wh-dark: #09090b;
+  --wh-gray-300: #d4d4d8;
+  --wh-radius: 20px;
+  --wh-radius-md: 14px;
+  --wh-shadow: 0 4px 20px rgba(0,0,0,0.06);
+
+  display: block;
+  background: var(--wh-bg);
+  min-height: 100vh;
+  padding: 28px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--wh-text);
+  box-sizing: border-box;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .kicker {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--wh-muted);
+    margin: 0;
+  }
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 6px 0 0;
+    color: var(--wh-dark);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: var(--wh-radius-md);
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--wh-dark);
+  background: var(--wh-dark);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  &:hover { background: #27272a; }
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--wh-panel);
+  border: 1px solid var(--wh-border);
+  border-radius: var(--wh-radius);
+  padding: 20px;
+  box-shadow: var(--wh-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+  span { color: var(--wh-muted); font-size: 14px; }
+  strong { font-size: 38px; font-weight: 700; margin: 8px 0; color: var(--wh-dark); }
+  small { color: var(--wh-muted); font-size: 13px; }
+  &.dark {
+    background: var(--wh-dark);
+    color: #fff;
+    border-color: var(--wh-dark);
+    span, small { color: #d4d4d8; }
+    strong { color: #fff; }
+  }
+}
+.tab-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+
+  button {
+    padding: 8px 20px;
+    background: #fff;
+    border: 1px solid var(--wh-border);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--wh-text);
+    transition: all 0.15s;
+
+    &:hover { background: #f4f4f5; }
+    &.active {
+      background: var(--wh-dark);
+      color: #fff;
+      border-color: var(--wh-dark);
+    }
+  }
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-select,
+.filter-btn {
+  flex: 0 0 auto;
+}
+
+.filter-select {
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid var(--wh-border);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--wh-text);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 180px;
+  width: auto;
+
+  &:hover { background: #f4f4f5; }
+  &:focus {
+    outline: none;
+    border-color: var(--wh-dark);
+  }
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid var(--wh-border);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--wh-text);
+  transition: all 0.15s;
+  &:hover { background: #f4f4f5; }
+  &.active {
+    background: var(--wh-dark);
+    color: #fff;
+    border-color: var(--wh-dark);
+  }
+}
+.panel {
+  background: var(--wh-panel);
+  border: 1px solid var(--wh-border);
+  border-radius: var(--wh-radius);
+  box-shadow: var(--wh-shadow);
+  padding: 22px;
+  h3 { margin: 0 0 16px; font-size: 18px; font-weight: 700; }
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  th, td {
+    text-align: left;
+    padding: 12px 12px;
+    border-bottom: 1px solid var(--wh-border);
+    font-size: 14px;
+  }
+  th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--wh-muted);
+  }
+  tbody tr:hover { background: #f9f9f9; }
+  .ingredient-name { font-weight: 600; }
+  .empty-message {
+    padding: 32px 0;
+    text-align: center;
+    color: var(--wh-muted);
+    font-size: 15px;
+  }
+}
+
+.stock-amount {
+  font-weight: 600;
+  min-width: 80px;
+  text-align: left;
+  display: inline-block;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f4f4f5;
+  color: #3f3f46;
+
+  &.ok {
+    background: #22c55e;
+    color: white;
+  }
+  &.low {
+    background: #f59e0b; 
+    color: white;
+  }
+  &.out {
+    background: #ef4444;
+    color: white;
+  }
+}
+.skeleton-line {
+  display: block;
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.w-30 { width: 30%; }
+.w-50 { width: 50%; }
+.w-70 { width: 70%; }
+.skeleton-lines .skeleton-line { height: 20px; margin-bottom: 8px; }
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  :host { padding: 16px; }
+  .page-header h1 { font-size: 34px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .tab-row { flex-direction: column; align-items: flex-start; }
+}
+
+
+table tbody tr {
+  cursor: pointer;
+}
+
+.delete-btn {
+  cursor: pointer;
+}

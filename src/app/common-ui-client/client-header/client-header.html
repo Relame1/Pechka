@@ -1,0 +1,117 @@
+<header class="main-header" [class.scrolled]="isScrolled">
+  <div class="header-container">
+    <div class="logo">
+      <div class="logo-text">Домашняя Пекарня</div>
+    </div>
+   
+    <nav class="main-nav">
+      <a routerLink="/client" routerLinkActive="active" class="nav-link">Главная</a>
+      <a routerLink="/about" routerLinkActive="active" class="nav-link">О нас</a>
+      <a routerLink="/menu" routerLinkActive="active" class="nav-link">Меню</a>
+      <a routerLink="/advantages" routerLinkActive="active" class="nav-link">Преимущества</a>
+      <a routerLink="/reviews" routerLinkActive="active" class="nav-link">Отзывы</a>
+      <a routerLink="/contacts" routerLinkActive="active" class="nav-link">Контакты</a>
+    </nav>
+   
+    <div class="header-actions">
+      <!-- Если пользователь авторизован - показываем профиль -->
+      <div *ngIf="isAuthenticated" class="user-menu">
+        <button class="profile-btn" (click)="toggleProfileMenu()">
+          <div class="profile-avatar">{{ getUserInitial() }}</div>
+          <span class="profile-name">{{ getUserName() }}</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+       
+        <!-- Выпадающее меню профиля -->
+        <div class="profile-dropdown" [class.open]="profileMenuOpen">
+          <div class="dropdown-header">
+            <div class="dropdown-avatar">{{ getUserInitial() }}</div>
+            <div class="dropdown-info">
+              <div class="dropdown-name">{{ getUserName() }}</div>
+              <div class="dropdown-email">{{ getUserEmail() }}</div>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          
+          <a routerLink="/client/profile" class="dropdown-item" (click)="toggleProfileMenu()">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+         </svg>
+             Мой профиль
+        </a>
+          
+          <a routerLink="/client/orders" class="dropdown-item" (click)="toggleProfileMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3h18v18H3z"/>
+              <path d="M9 9h6M9 15h6"/>
+            </svg>
+            Мои заказы
+          </a>
+          
+          <div class="dropdown-divider"></div>
+          
+          <button class="dropdown-item logout" (click)="logout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Выйти
+          </button>
+        </div>
+      </div>
+     
+      <!-- Если пользователь не авторизован -->
+      <div *ngIf="!isAuthenticated" class="auth-buttons">
+        <button class="btn-login" routerLink="/login">Войти</button>
+        <button class="btn-register" routerLink="/register">Регистрация</button>
+      </div>
+     
+      <button class="cart-header-btn" (click)="toggleCart()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <span class="cart-count" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+      </button>
+      
+      <button class="mobile-menu-btn" (click)="toggleMobileMenu()">☰</button>
+    </div>
+  </div>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" [class.open]="mobileMenuOpen">
+    <a routerLink="/client" (click)="toggleMobileMenu()">Главная</a>
+    <a routerLink="/about" (click)="toggleMobileMenu()">О нас</a>
+    <a routerLink="/menu" (click)="toggleMobileMenu()">Меню</a>
+    <a routerLink="/advantages" (click)="toggleMobileMenu()">Преимущества</a>
+    <a routerLink="/reviews" (click)="toggleMobileMenu()">Отзывы</a>
+    <a routerLink="/contacts" (click)="toggleMobileMenu()">Контакты</a>
+   
+    <!-- Мобильное меню для авторизованного пользователя -->
+    <div *ngIf="isAuthenticated" class="mobile-auth">
+      <div class="mobile-user-info">
+        <div class="mobile-user-avatar">{{ getUserInitial() }}</div>
+        <div class="mobile-user-details">
+          <div class="mobile-user-name">{{ getUserName() }}</div>
+          <div class="mobile-user-email">{{ getUserEmail() }}</div>
+        </div>
+      </div>
+      
+      <a routerLink="/client/profile" class="mobile-login" (click)="toggleMobileMenu()">Профиль</a>
+      <a routerLink="/client/orders" class="mobile-login" (click)="toggleMobileMenu()">Мои заказы</a>
+      
+      <button class="mobile-register" (click)="logout()">Выйти</button>
+    </div>
+   
+    <!-- Мобильное меню для неавторизованного пользователя -->
+    <div *ngIf="!isAuthenticated" class="mobile-auth">
+      <a routerLink="/login" class="mobile-login" (click)="toggleMobileMenu()">Войти</a>
+      <a routerLink="/register" class="mobile-register" (click)="toggleMobileMenu()">Регистрация</a>
+    </div>
+  </div>
+</header>

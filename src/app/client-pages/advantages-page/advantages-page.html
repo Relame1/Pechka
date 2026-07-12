@@ -1,0 +1,141 @@
+<div class="advantages-page">
+  <app-client-header></app-client-header>
+
+  <!-- Герой-секция -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Наши <span class="highlight">преимущества</span></h1>
+      <p class="hero-subtitle">Почему тысячи клиентов выбирают нас</p>
+    </div>
+  </section>
+
+  <!-- Статистика -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card" *ngFor="let stat of stats">
+          <div class="stat-number">{{ stat.number }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Преимущества -->
+  <section class="advantages-section">
+    <div class="container">
+      <div class="section-badge centered">Почему выбирают нас</div>
+      <h2 class="section-title">Наши ключевые <span class="highlight">преимущества</span></h2>
+      <p class="section-subtitle">Мы гордимся тем, что предлагаем нашим клиентам</p>
+      
+      <div class="advantages-grid">
+        <div class="advantage-card" *ngFor="let advantage of advantages; let i = index">
+          <div class="advantage-number">{{ (i + 1).toString().padStart(2, '0') }}</div>
+          <div class="advantage-icon">{{ advantage.icon }}</div>
+          <h3>{{ advantage.title }}</h3>
+          <p>{{ advantage.description }}</p>
+          <div class="advantage-detail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{{ advantage.details }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Сравнение -->
+  <section class="comparison-section">
+    <div class="container">
+      <div class="section-badge centered">Сравните сами</div>
+      <h2 class="section-title">Мы vs <span class="highlight">Обычные пекарни</span></h2>
+      
+      <div class="comparison-table">
+        <div class="comparison-row header">
+          <div class="comparison-cell">Критерий</div>
+          <div class="comparison-cell">Домашняя Пекарня</div>
+          <div class="comparison-cell">Обычная пекарня</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Ингредиенты</div>
+          <div class="comparison-cell">✅ Только натуральные</div>
+          <div class="comparison-cell">❌ Часто с добавками</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Свежесть</div>
+          <div class="comparison-cell">✅ Печём каждое утро</div>
+          <div class="comparison-cell">❌ Выпечка может стоять</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Доставка</div>
+          <div class="comparison-cell">✅ Бесплатно от 1000 ₽</div>
+          <div class="comparison-cell">❌ Платная</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Ассортимент</div>
+          <div class="comparison-cell">✅ 50+ видов выпечки</div>
+          <div class="comparison-cell">❌ Ограниченный выбор</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Бонусы</div>
+          <div class="comparison-cell">✅ 5% кэшбек</div>
+          <div class="comparison-cell">❌ Нет программы</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Гарантия</div>
+          <div class="comparison-cell">✅ Возврат денег</div>
+          <div class="comparison-cell">❌ Без гарантии</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Отзывы клиентов -->
+  <section class="reviews-section">
+    <div class="container">
+      <div class="section-badge centered">Реальные отзывы</div>
+      <h2 class="section-title">Что говорят наши <span class="highlight">клиенты</span></h2>
+      
+      <div class="reviews-grid">
+        <div class="review-card">
+          <div class="review-avatar">А</div>
+          <div class="review-name">Анна</div>
+          <div class="review-rating">★★★★★</div>
+          <p class="review-text">"Заказываю здесь уже год! Всегда свежая выпечка, приятные цены и быстрая доставка. Особенно нравятся круассаны - просто тают во рту!"</p>
+        </div>
+        <div class="review-card">
+          <div class="review-avatar">М</div>
+          <div class="review-name">Михаил</div>
+          <div class="review-rating">★★★★★</div>
+          <p class="review-text">"Лучшая пекарня в городе! Натуральные ингредиенты чувствуются. Дети обожают их булочки с корицей. Рекомендую!"</p>
+        </div>
+        <div class="review-card">
+          <div class="review-avatar">Е</div>
+          <div class="review-name">Елена</div>
+          <div class="review-rating">★★★★★</div>
+          <p class="review-text">"Отличный сервис! Заказывала торт на день рождения - сделали точно по моему дизайну. Вкусно и красиво!"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Баннер -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Готовы попробовать?</h2>
+        <p>Закажите нашу свежую выпечку прямо сейчас</p>
+        <div class="cta-buttons">
+          <a routerLink="/menu" class="btn-primary">Смотреть меню</a>
+          <a routerLink="/contacts" class="btn-secondary">Связаться с нами</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-client-footer></app-client-footer>
+  <app-client-cart></app-client-cart>
+  <app-client-chat></app-client-chat>
+</div>

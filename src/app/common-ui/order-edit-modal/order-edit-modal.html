@@ -1,0 +1,73 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Редактирование заказа #{{ order?.code }}</h2>
+      <button class="close-btn" (click)="onClose()">✕</button>
+    </div>
+
+    <div *ngIf="form">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+          <!-- Основные поля -->
+          <div class="form-group">
+            <label>Имя клиента *</label>
+            <input type="text" formControlName="customer_name">
+          </div>
+          <div class="form-group">
+            <label>Телефон</label>
+            <input type="tel" formControlName="customer_phone">
+          </div>
+          <div class="form-group">
+            <label>Тип доставки *</label>
+            <select formControlName="delivery_type">
+              <option value="Доставка">Доставка</option>
+              <option value="Самовывоз">Самовывоз</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Адрес доставки</label>
+            <input type="text" formControlName="address">
+          </div>
+          <div class="form-group">
+            <label>Срок выполнения *</label>
+            <input type="datetime-local" formControlName="due_at">
+          </div>
+          <div class="form-group">
+            <label>Комментарий</label>
+            <textarea formControlName="comment" rows="2"></textarea>
+          </div>
+
+          <!-- Состав заказа -->
+          <div class="items-section">
+            <label>Состав заказа</label>
+            <div formArrayName="items">
+              <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="item-row">
+                <select formControlName="product_id" class="item-product">
+                  <option [value]="null">Выберите продукт</option>
+                  <option *ngFor="let product of products" [value]="product.id">
+                    {{ product.name }} — {{ product.price | number:'1.0-0' }} ₽ / {{ product.unit }}
+                  </option>
+                </select>
+                <input type="number" formControlName="quantity" class="item-qty" step="0.5" min="0.5">
+                <span class="item-price">{{ item.get('price')?.value | number:'1.0-0' }} ₽</span>
+                <span class="item-total">{{ item.get('total')?.value | number:'1.0-0' }} ₽</span>
+                <button type="button" class="remove-item-btn" (click)="removeItem(i)">×</button>
+              </div>
+            </div>
+            <button type="button" class="add-item-btn" (click)="addItem()">+ Добавить продукт</button>
+            <div class="order-total" *ngIf="items.controls.length">
+              <strong>Итого:</strong> {{ orderTotal | number:'1.0-0' }} ₽
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="primary-btn" [disabled]="loading || form.invalid">
+            {{ loading ? 'Сохранение...' : 'Сохранить' }}
+          </button>
+          <button type="button" class="ghost-btn" (click)="onClose()" [disabled]="loading">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

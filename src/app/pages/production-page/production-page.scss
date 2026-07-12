@@ -1,0 +1,477 @@
+:host {
+  --prod-bg: #f4f4f5;
+  --prod-panel: #ffffff;
+  --prod-border: #e4e4e7;
+  --prod-text: #18181b;
+  --prod-muted: #71717a;
+  --prod-dark: #09090b;
+  --prod-gray-100: #f4f4f5;
+  --prod-gray-300: #d4d4d8;
+  --prod-gray-500: #71717a;
+  --prod-gray-700: #3f3f46;
+  --prod-radius: 20px;
+  --prod-radius-md: 14px;
+  --prod-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+
+  display: block;
+  background: var(--prod-bg);
+  min-height: 100vh;
+  padding: 28px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--prod-text);
+  box-sizing: border-box;
+}
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  .kicker {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--prod-muted);
+    margin: 0;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 6px 0 0;
+    color: var(--prod-dark);
+  }
+}
+
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--prod-radius-md);
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--prod-dark);
+  cursor: pointer;
+  background: var(--prod-dark);
+  color: #fff;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #27272a;
+  }
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--prod-panel);
+  border: 1px solid var(--prod-border);
+  border-radius: var(--prod-radius);
+  padding: 20px;
+  box-shadow: var(--prod-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+
+  span {
+    color: var(--prod-muted);
+    font-size: 14px;
+  }
+
+  strong {
+    font-size: 38px;
+    font-weight: 700;
+    margin: 8px 0;
+    color: var(--prod-dark);
+  }
+
+  small {
+    color: var(--prod-muted);
+    font-size: 13px;
+  }
+
+  &.dark {
+    background: var(--prod-dark);
+    color: #fff;
+    border-color: var(--prod-dark);
+
+    span, small {
+      color: #d4d4d8;
+    }
+    strong {
+      color: #fff;
+    }
+  }
+}
+.kanban-section {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 24px;
+    margin: 0 0 16px;
+    font-weight: 700;
+  }
+}
+
+.kanban-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.kanban-col {
+  background: #fbfbfc;
+  border: 1px solid var(--prod-border);
+  border-radius: var(--prod-radius-md);
+  padding: 12px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kanban-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--prod-border);
+
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .kanban-count {
+    background: var(--prod-dark);
+    color: #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.kanban-cards {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.kanban-card {
+  background: #fff;
+  border: 1px solid var(--prod-border);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+
+  .card-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--prod-muted);
+    font-size: 12px;
+  }
+
+  .card-footer {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--prod-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:before {
+      content: '👤';
+      font-size: 12px;
+    }
+  }
+
+  .card-time {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--prod-dark);
+    font-weight: 600;
+  }
+}
+
+.kanban-empty {
+  font-size: 13px;
+  color: var(--prod-muted);
+  text-align: center;
+  padding: 20px 0;
+}
+.production-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.panel {
+  background: var(--prod-panel);
+  border: 1px solid var(--prod-border);
+  border-radius: var(--prod-radius);
+  box-shadow: var(--prod-shadow);
+  padding: 22px;
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
+.ovens-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.oven-item {
+  border: 1px solid var(--prod-border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fbfbfc;
+}
+
+.oven-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+
+  .oven-name {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .oven-temp {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--prod-dark);
+
+    &.idle {
+      color: var(--prod-muted);
+      font-weight: normal;
+      font-size: 14px;
+    }
+  }
+}
+
+.oven-task {
+  display: flex;
+  gap: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+
+  .oven-task-label {
+    color: var(--prod-muted);
+  }
+
+  .oven-task-value {
+    font-weight: 600;
+    &.free {
+      color: var(--prod-muted);
+      font-style: italic;
+    }
+  }
+}
+
+.oven-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--prod-muted);
+  margin-bottom: 8px;
+
+  strong {
+    color: var(--prod-dark);
+  }
+}
+
+.oven-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e4e4e7;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.oven-progress-fill {
+  height: 100%;
+  background: var(--prod-dark);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.ingredients-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ingredient-item {
+  border-bottom: 1px solid var(--prod-border);
+  padding-bottom: 12px;
+  &:last-child { border-bottom: none; }
+}
+
+.ingredient-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+
+  .ingredient-name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .ingredient-needed {
+    font-size: 13px;
+    color: var(--prod-muted);
+  }
+}
+
+.ingredient-stock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stock-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: #e4e4e7;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stock-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+
+  &.stock-ok {
+    background: #22c55e;   
+  }
+  &.stock-low {
+    background: #f59e0b;   
+  }
+  &.stock-empty {
+    background: #ef4444;   
+  }
+}
+
+.stock-available {
+  font-size: 13px;
+  color: var(--prod-muted);
+  min-width: 50px;
+  text-align: right;
+}
+.completed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.completed-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--prod-border);
+  &:last-child { border-bottom: none; }
+
+  .completed-product {
+    font-weight: 600;
+    flex: 2;
+  }
+
+  .completed-qty {
+    color: var(--prod-muted);
+    flex: 1;
+    text-align: center;
+  }
+
+  .completed-order {
+    color: var(--prod-muted);
+    flex: 1;
+    text-align: right;
+    font-size: 13px;
+  }
+}
+.skeleton-line {
+  display: block;
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.w-30 { width: 30%; }
+.w-50 { width: 50%; }
+.w-70 { width: 70%; }
+@media (max-width: 1100px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .kanban-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .production-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+    h1 { font-size: 34px; }
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kanban-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .production-grid {
+    grid-template-columns: 1fr;
+  }
+}

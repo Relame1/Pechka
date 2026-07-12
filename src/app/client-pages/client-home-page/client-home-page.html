@@ -1,0 +1,230 @@
+<div class="client-site">
+  <app-client-header></app-client-header>
+
+  <!-- Герой-секция со слайдером -->
+  <section id="home" class="hero-section">
+    <div class="slideshow-container">
+      <div class="slide" *ngFor="let slide of slides; let i = index" [class.active]="currentSlideIndex === i">
+        <div class="slide-image" [style.backgroundImage]="'url(' + slide + ')'">
+          <div class="slide-overlay"></div>
+        </div>
+      </div>
+      
+      <button class="slide-prev" (click)="prevSlide()">❮</button>
+      <button class="slide-next" (click)="nextSlide()">❯</button>
+      
+      <div class="slide-dots">
+        <span *ngFor="let slide of slides; let i = index" 
+              class="dot" 
+              [class.active]="currentSlideIndex === i"
+              (click)="goToSlide(i)"></span>
+      </div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="hero-badge">Свежая выпечка каждый день</div>
+      <h1 class="hero-title">Домашняя <span class="highlight">Пекарня</span></h1>
+      <p class="hero-subtitle">Натуральные ингредиенты, любовь и забота в каждой булочке</p>
+      <div class="hero-buttons">
+        <button class="btn-primary" routerLink="/menu">Смотреть меню</button>
+        <button class="btn-secondary" routerLink="/contacts">Связаться с нами</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-number">10+</div>
+          <div class="stat-label">лет опыта</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">видов выпечки</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">5000+</div>
+          <div class="stat-label">довольных клиентов</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- О нас -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image">
+          <div class="image-stack">
+            <div class="image-card image-1" [style.backgroundImage]="'url(' + aboutImage1 + ')'"></div>
+            <div class="image-card image-2" [style.backgroundImage]="'url(' + aboutImage2 + ')'"></div>
+          </div>
+        </div>
+        <div class="about-content">
+          <div class="section-badge">О нас</div>
+          <h2>Мы печём с <span class="highlight">душой</span></h2>
+          <p>Наша пекарня — это место, где традиционные рецепты встречаются с любовью и заботой о каждом клиенте. Мы используем только лучшие натуральные ингредиенты, никаких консервантов и усилителей вкуса.</p>
+          <p>Каждое утро в 4 часа мы начинаем замешивать тесто, чтобы к 8 утра вы могли насладиться свежей, ароматной выпечкой.</p>
+          <div class="about-features">
+            <div class="feature">
+              <div class="feature-icon">🌾</div>
+              <div>Только натуральные ингредиенты</div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">👨‍🍳</div>
+              <div>Опытные пекари</div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">🚚</div>
+              <div>Бесплатная доставка от 1000 ₽</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Меню -->
+  <section id="menu" class="menu-section">
+    <div class="container">
+      <div class="section-badge centered">Наше меню</div>
+      <h2 class="section-title">Популярные <span class="highlight">позиции</span></h2>
+      <p class="section-subtitle">Выберите свою любимую выпечку</p>
+      
+      <div class="menu-categories">
+        <button *ngFor="let cat of categories" 
+                class="category-pill" 
+                [class.active]="selectedCategory === cat"
+                (click)="selectCategory(cat)">
+          {{ cat }}
+        </button>
+      </div>
+      
+      <div class="products-grid" *ngIf="!isLoading">
+        <div class="product-card" *ngFor="let product of filteredProducts">
+          <div class="product-badge" *ngIf="isNewProduct(product)">Новинка</div>
+          
+          <!-- Изображение продукта -->
+          <div class="product-image">
+            <img 
+              *ngIf="getProductImageUrl(product)" 
+              [src]="getProductImageUrl(product)" 
+              [alt]="product.name"
+              class="product-img"
+              (error)="product.image_url = ''; product.image = ''">
+            <div class="product-image-placeholder" *ngIf="!getProductImageUrl(product)">
+              <div class="placeholder-icon">{{ getProductIcon(product.category) }}</div>
+            </div>
+          </div>
+          
+          <h3 class="product-title">{{ product.name }}</h3>
+          <p class="product-description">{{ product.description || 'Свежая выпечка из натуральных ингредиентов' }}</p>
+          <div class="product-price">{{ product.price | number:'1.0-0' }} ₽</div>
+          <button class="add-to-cart" (click)="addToCart(product, $event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            В корзину
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="isLoading" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Загрузка меню...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Преимущества -->
+  <section id="advantages" class="advantages-section">
+    <div class="container">
+      <div class="section-badge centered">Почему выбирают нас</div>
+      <h2 class="section-title">Наши <span class="highlight">преимущества</span></h2>
+      
+      <div class="advantages-grid">
+        <div class="advantage-card">
+          <div class="advantage-icon">🌿</div>
+          <h3>Натуральные продукты</h3>
+          <p>Используем только свежие, натуральные ингредиенты без консервантов</p>
+        </div>
+        <div class="advantage-card">
+          <div class="advantage-icon">👨‍🍳</div>
+          <h3>Ручная работа</h3>
+          <p>Каждое изделие лепится вручную с любовью и вниманием</p>
+        </div>
+        <div class="advantage-card">
+          <div class="advantage-icon">🚚</div>
+          <h3>Быстрая доставка</h3>
+          <p>Доставим ваш заказ горячим в течение часа</p>
+        </div>
+        <div class="advantage-card">
+          <div class="advantage-icon">💯</div>
+          <h3>Гарантия качества</h3>
+          <p>Если вам не понравится, мы вернём деньги</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Отзывы -->
+  <section id="reviews" class="reviews-section">
+    <div class="container">
+      <div class="section-badge centered">Отзывы</div>
+      <h2 class="section-title">Что говорят наши <span class="highlight">клиенты</span></h2>
+      
+      <div class="reviews-slider">
+        <button class="slider-btn prev" (click)="prevReview()">←</button>
+        <div class="reviews-container">
+          <div class="review-card" *ngFor="let review of visibleReviews">
+            <div class="review-avatar">{{ review.name.charAt(0) }}</div>
+            <div class="review-name">{{ review.name }}</div>
+            <div class="review-rating">★★★★★</div>
+            <p class="review-text">{{ review.text }}</p>
+            <div class="review-date">{{ review.date }}</div>
+          </div>
+        </div>
+        <button class="slider-btn next" (click)="nextReview()">→</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Контакты -->
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="section-badge">Контакты</div>
+          <h2>Свяжитесь с <span class="highlight">нами</span></h2>
+          <p>Мы всегда рады ответить на ваши вопросы</p>
+          
+          <div class="info-item">
+            <div class="info-icon">📍</div>
+            <div>г. Москва, ул. Хлебная, 15</div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">📞</div>
+            <div>+7 (999) 123-45-67</div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">✉️</div>
+            <div>hello&#64;bakery.ru</div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">⏰</div>
+            <div>Ежедневно: 8:00 - 21:00</div>
+          </div>
+        </div>
+        
+        <div class="contact-form">
+          <h3>Оставить заявку</h3>
+          <input type="text" placeholder="Ваше имя" [(ngModel)]="contactName">
+          <input type="email" placeholder="Email" [(ngModel)]="contactEmail">
+          <textarea rows="3" placeholder="Сообщение" [(ngModel)]="contactMessage"></textarea>
+          <button class="btn-primary" (click)="sendContact()">Отправить</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-client-footer></app-client-footer>
+  <app-client-cart></app-client-cart>
+  <app-client-chat></app-client-chat>
+</div>

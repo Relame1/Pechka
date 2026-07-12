@@ -1,0 +1,235 @@
+<section class="warehouse-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Управление запасами</p>
+      <h1>Склад</h1>
+    </div>
+    <div class="header-actions">
+      <button class="primary-btn" *ngIf="viewMode === 'ingredients'" (click)="openBulkAddModal()">
+        + Массовое добавление
+      </button>
+      <button class="primary-btn" *ngIf="viewMode === 'ingredients'" routerLink="/warehouse/ingredient/new">
+        + Новый ингредиент
+      </button>
+      <button class="primary-btn" *ngIf="viewMode === 'products'" routerLink="/products/new">
+        + Новый продукт
+      </button>
+    </div>
+  </header>
+
+  <!-- Статистика -->
+  <div class="stats-grid" *ngIf="!loading; else statsSkeleton">
+    <ng-container *ngIf="viewMode === 'ingredients'">
+      <div class="stat-card">
+        <span>Всего ингредиентов</span>
+        <strong>{{ ingredients.length }}</strong>
+        <small>на складе</small>
+      </div>
+      <div class="stat-card dark">
+        <span>На исходе</span>
+        <strong>{{ ingredientsLowStockCount }}</strong>
+        <small>требуют пополнения</small>
+      </div>
+      <div class="stat-card">
+        <span>Закончились</span>
+        <strong>{{ ingredientsOutOfStockCount }}</strong>
+        <small>нет в наличии</small>
+      </div>
+      <div class="stat-card">
+        <span>Стоимость запасов</span>
+        <strong>{{ ingredientsTotalValue | number:'1.0-0' }} ₽</strong>
+        <small>оценочно</small>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="viewMode === 'products'">
+      <div class="stat-card">
+        <span>Всего продуктов</span>
+        <strong>{{ products.length }}</strong>
+        <small>в каталоге</small>
+      </div>
+      <div class="stat-card dark">
+        <span>В наличии</span>
+        <strong>{{ productsInStockCount }}</strong>
+        <small>доступно к заказу</small>
+      </div>
+      <div class="stat-card">
+        <span>Нет в наличии</span>
+        <strong>{{ productsOutOfStockCount }}</strong>
+        <small>временно отсутствуют</small>
+      </div>
+      <div class="stat-card">
+        <span>Стоимость запасов</span>
+        <strong>{{ productsTotalValue | number:'1.0-0' }} ₽</strong>
+        <small>по всем продуктам</small>
+      </div>
+    </ng-container>
+  </div>
+
+  <ng-template #statsSkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of [1,2,3,4]">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Переключатель режимов -->
+  <div class="tab-row">
+    <div class="tabs">
+      <button [class.active]="viewMode === 'ingredients'" (click)="setViewMode('ingredients')">
+        Ингредиенты
+      </button>
+      <button [class.active]="viewMode === 'products'" (click)="setViewMode('products')">
+        Продукты
+      </button>
+    </div>
+  </div>
+
+  <!-- Таблица ингредиентов -->
+  <ng-container *ngIf="viewMode === 'ingredients'">
+    <div class="filter-bar">
+      <select class="filter-select" [(ngModel)]="ingredientCategoryFilter">
+        <option value="all">Все категории</option>
+        <option *ngFor="let cat of ingredientCategories" [value]="cat">{{ cat }}</option>
+      </select>
+      <button class="filter-btn" [class.active]="stockFilter === 'all'" (click)="stockFilter = 'all'">Все</button>
+      <button class="filter-btn" [class.active]="stockFilter === 'low'" (click)="stockFilter = 'low'">Мало</button>
+      <button class="filter-btn" [class.active]="stockFilter === 'out'" (click)="stockFilter = 'out'">Закончились</button>
+    </div>
+
+    <div class="panel table-panel">
+      <h3>Ингредиенты на складе</h3>
+      <div class="table-wrap" *ngIf="!loading; else tableSkeleton">
+        <table>
+          <thead>
+            <tr>
+              <th>Наименование</th>
+              <th>Категория</th>
+              <th>Остаток</th>
+              <th>Мин. запас</th>
+              <th>Цена за ед.</th>
+              <th>Статус</th>
+              <th>Последняя поставка</th>
+              <th style="width:110px">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredIngredients" (click)="openIngredientModal(item)">
+              <td class="ingredient-name">{{ item.name }}</td>
+              <td>{{ item.category }}</td>
+              <td class="stock-amount-cell">
+                <span class="stock-amount">{{ item.stock | number:'1.0-3' }} {{ item.unit }}</span>
+              </td>
+              <td>{{ item.min_stock | number:'1.0-3' }} {{ item.unit }}</td>
+              <td>{{ item.price_per_unit | number:'1.0-2' }} ₽</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStockStatus(item.stock, item.min_stock)">
+                  {{ getStockLabel(getStockStatus(item.stock, item.min_stock)) }}
+                </span>
+              </td>
+              <td>{{ item.last_delivery ? (item.last_delivery | date:'dd.MM.yyyy' : 'UTC') : '—' }}</td>
+              <td>
+                <button class="delete-btn" (click)="$event.stopPropagation(); deleteIngredient(item.id!)">Удалить</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredIngredients.length === 0">
+              <td colspan="8" class="empty-message">Нет ингредиентов по выбранному фильтру</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Таблица продуктов -->
+  <ng-container *ngIf="viewMode === 'products'">
+    <div class="filter-bar">
+      <select class="filter-select" [(ngModel)]="productCategoryFilter">
+        <option value="all">Все категории</option>
+        <option *ngFor="let cat of productCategories" [value]="cat">{{ cat }}</option>
+      </select>
+      <button class="filter-btn" [class.active]="productStockFilter === 'all'" (click)="productStockFilter = 'all'">Все</button>
+      <button class="filter-btn" [class.active]="productStockFilter === 'in_stock'" (click)="productStockFilter = 'in_stock'">В наличии</button>
+      <button class="filter-btn" [class.active]="productStockFilter === 'out_of_stock'" (click)="productStockFilter = 'out_of_stock'">Нет в наличии</button>
+    </div>
+
+    <div class="panel table-panel">
+      <h3>Продукты</h3>
+      <div class="table-wrap" *ngIf="!loading; else tableSkeleton">
+        <table>
+          <thead>
+            <tr>
+              <th>Артикул</th>
+              <th>Название</th>
+              <th>Категория</th>
+              <th>Цена</th>
+              <th>Количество</th>
+              <th>Ед.</th>
+              <th>Статус</th>
+              <th>Время приготовления</th>
+              <th style="width:110px">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of filteredProducts" (click)="openStockModal(product)">
+              <td>{{ product.article }}</td>
+              <td class="product-name">{{ product.name }}</td>
+              <td>{{ product.category }}</td>
+              <td>{{ product.price | number:'1.0-2' }} ₽</td>
+              <td class="stock-amount-cell">
+                <span class="stock-amount">{{ product.stock | number:'1.0-3' }} {{ product.unit }}</span>
+              </td>
+              <td>{{ product.unit }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="product.stock > 0 ? 'ok' : 'out'">
+                  {{ getProductStatusLabel(product.stock > 0) }}
+                </span>
+              </td>
+              <td>{{ product.prep_time ? product.prep_time + ' мин' : '—' }}</td>
+              <td>
+                <button class="delete-btn" (click)="$event.stopPropagation(); deleteProduct(product.id!)">Удалить</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredProducts.length === 0">
+              <td colspan="9" class="empty-message">Нет продуктов по выбранному фильтру</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #tableSkeleton>
+    <div class="skeleton-lines">
+      <div class="skeleton-line" *ngFor="let _ of [1,2,3,4,5]"></div>
+    </div>
+  </ng-template>
+</section>
+
+<!-- Модальное окно изменения количества продукта -->
+<app-product-stock-modal
+  [product]="selectedProduct"
+  [visible]="showStockModal"
+  [loading]="isUpdatingStock"
+  (close)="closeStockModal()"
+  (save)="updateProductStock($event)"
+></app-product-stock-modal>
+
+<!-- Модальное окно редактирования ингредиента -->
+<app-ingredient-stock-modal
+  [ingredient]="selectedIngredient"
+  [visible]="showIngredientStockModal"
+  [loading]="isUpdatingIngredient"
+  (close)="closeIngredientModal()"
+  (save)="updateIngredient($event)"
+></app-ingredient-stock-modal>
+
+<!-- Модальное окно массового добавления ингредиентов -->
+<app-bulk-add-ingredients-modal
+  [visible]="showBulkAddModal"
+  (close)="closeBulkAddModal()"
+  (added)="onIngredientsAdded()"
+></app-bulk-add-ingredients-modal>

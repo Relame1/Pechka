@@ -1,0 +1,174 @@
+<section class="production-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Управление</p>
+      <h1>Производство</h1>
+    </div>
+    <button class="primary-btn" routerLink="/orders/new">
+      + Новый заказ
+    </button>
+  </header>
+
+  <!-- Карточки статистики -->
+  <div class="stats-grid" *ngIf="!loading; else statsSkeleton">
+    <div class="stat-card">
+      <span>Активные задачи</span>
+      <strong>{{ stats.active }}</strong>
+      <small>в работе</small>
+    </div>
+    <div class="stat-card dark">
+      <span>В процессе</span>
+      <strong>{{ stats.inProgress }}</strong>
+      <small>подготовка / выпечка</small>
+    </div>
+    <div class="stat-card">
+      <span>Завершено сегодня</span>
+      <strong>{{ stats.completedToday }}</strong>
+      <small>готово к выдаче</small>
+    </div>
+    <div class="stat-card">
+      <span>Просрочено</span>
+      <strong>{{ stats.delayed }}</strong>
+      <small>требует внимания</small>
+    </div>
+  </div>
+  <ng-template #statsSkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of skeletonCards">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Канбан-доска -->
+  <div class="kanban-section">
+    <h2>Этапы производства</h2>
+    <div class="kanban-grid" *ngIf="!loading; else kanbanSkeleton">
+      <div class="kanban-col" *ngFor="let status of skeletonKanbanCols">
+        <div class="kanban-head" [ngClass]="getStatusClass(status)">
+          <h3>{{ getStatusLabel(status) }}</h3>
+          <span class="kanban-count">{{ getTasksByStatus(status).length }}</span>
+        </div>
+        <div class="kanban-cards">
+          <div class="kanban-card" *ngFor="let task of getTasksByStatus(status)">
+            <div class="card-title">{{ task.productName }}</div>
+            <div class="card-meta">
+              <span class="card-order">{{ task.orderCode }}</span>
+              <span class="card-qty">{{ task.quantity }} {{ task.unit }}</span>
+            </div>
+            <div class="card-footer" *ngIf="task.assignedTo">
+              <span>{{ task.assignedTo }}</span>
+            </div>
+            <div class="card-time" *ngIf="task.startTime">
+              {{ task.startTime }} – {{ task.endTime }}
+            </div>
+          </div>
+          <div class="kanban-empty" *ngIf="getTasksByStatus(status).length === 0">
+            Нет задач
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #kanbanSkeleton>
+      <div class="kanban-grid">
+        <div class="kanban-col" *ngFor="let _ of skeletonKanbanCols">
+          <div class="skeleton-line" style="height: 30px; margin-bottom: 12px;"></div>
+          <div class="skeleton-line" style="height: 80px; margin-bottom: 8px;" *ngFor="let _ of [1,2]"></div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Нижняя сетка: печи и ингредиенты -->
+  <div class="production-grid">
+    <!-- Расписание печей -->
+    <div class="panel ovens-panel">
+      <h3>Печи</h3>
+      <div class="ovens-list" *ngIf="!loading; else ovensSkeleton">
+        <div class="oven-item" *ngFor="let oven of ovens">
+          <div class="oven-header">
+            <span class="oven-name">{{ oven.ovenName }}</span>
+            <!-- Если печь занята – показываем температуру, если свободна – "Не в работе" -->
+            <span class="oven-temp" *ngIf="oven.currentTask !== '—'">{{ oven.temp }}°C</span>
+            <span class="oven-temp idle" *ngIf="oven.currentTask === '—'">Не в работе</span>
+          </div>
+          <div class="oven-task">
+            <span class="oven-task-label">Текущая задача:</span>
+            <span class="oven-task-value" [class.free]="oven.currentTask === '—'">
+              {{ oven.currentTask }}
+            </span>
+          </div>
+          <div class="oven-meta">
+            <div class="oven-remaining">
+              <span>Осталось:</span>
+              <strong>{{ oven.remaining }}</strong>
+            </div>
+            <!-- Поле "Следующая" показываем только если есть данные -->
+            <div class="oven-next" *ngIf="oven.nextTask">
+              <span>Следующая:</span>
+              <span>{{ oven.nextTask }}</span>
+            </div>
+          </div>
+          <!-- Прогресс-бар отображаем только для занятой печи -->
+          <div class="oven-progress-bar" *ngIf="oven.currentTask !== '—'">
+            <div class="oven-progress-fill" [style.width.%]="((oven._totalSeconds - oven._remainingSeconds) / oven._totalSeconds) * 100"></div>
+          </div>
+        </div>
+      </div>
+      <ng-template #ovensSkeleton>
+        <div class="skeleton-lines">
+          <div class="skeleton-line" *ngFor="let _ of [1,2,3,4]"></div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Ингредиенты -->
+    <div class="panel ingredients-panel">
+      <h3>Необходимые ингредиенты</h3>
+      <ul class="ingredients-list" *ngIf="!loading; else ingredientsSkeleton">
+        <li *ngFor="let ing of ingredients" class="ingredient-item">
+          <div class="ingredient-info">
+            <span class="ingredient-name">{{ ing.ingredient }}</span>
+            <span class="ingredient-needed">
+              Нужно: {{ ing.needed }} {{ ing.unit }}
+            </span>
+          </div>
+          <div class="ingredient-stock">
+            <div class="stock-bar-bg">
+              <div
+                class="stock-bar-fill"
+                [style.width.%]="(ing.available / ing.needed) * 100"
+                [ngClass]="getStockLevelClass(ing.needed, ing.available)"
+              ></div>
+            </div>
+            <span class="stock-available">{{ ing.available }} {{ ing.unit }}</span>
+          </div>
+        </li>
+      </ul>
+      <ng-template #ingredientsSkeleton>
+        <div class="skeleton-lines">
+          <div class="skeleton-line" *ngFor="let _ of [1,2,3,4]"></div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Последние завершённые -->
+    <div class="panel completed-panel">
+      <h3>Последние завершённые</h3>
+      <div class="completed-list" *ngIf="!loading; else completedSkeleton">
+        <div class="completed-item" *ngFor="let task of lastCompleted">
+          <span class="completed-product">{{ task.productName }}</span>
+          <span class="completed-qty">{{ task.quantity }} {{ task.unit }}</span>
+          <span class="completed-order">{{ task.orderCode }}</span>
+        </div>
+      </div>
+      <ng-template #completedSkeleton>
+        <div class="skeleton-lines">
+          <div class="skeleton-line" *ngFor="let _ of [1,2,3,4]"></div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</section>

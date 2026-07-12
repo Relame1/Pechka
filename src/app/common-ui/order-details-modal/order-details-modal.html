@@ -1,0 +1,51 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Детали заказа #{{ order?.code }}</h2>
+      <button class="close-btn" (click)="onClose()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="order">
+      <p><strong>Клиент:</strong> {{ order.customer_name }}</p>
+      <p><strong>Телефон:</strong> {{ order.customer_phone || '—' }}</p>
+      <p><strong>Адрес:</strong> {{ order.address || '—' }}</p>
+      <p><strong>Тип доставки:</strong> {{ order.delivery_type }}</p>
+      <p><strong>Срок выполнения:</strong> {{ order.due_at | date:'dd.MM.yyyy HH:mm' }}</p>
+      <p><strong>Статус:</strong>
+        <span class="status-badge" [class.completed]="order.status === 'Завершён'">
+          {{ order.status }}
+        </span>
+      </p>
+      <p><strong>Сумма заказа:</strong> {{ order.amount | number:'1.2-2' }} ₽</p>
+      <p><strong>Комментарий:</strong> {{ order.comment || '—' }}</p>
+
+      <h3>Состав заказа</h3>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Продукт</th>
+            <th>Кол-во</th>
+            <th>Цена (₽)</th>
+            <th>Сумма (₽)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of normalizedItems">
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity | number:'1.0-2' }} шт</td>
+            <td>{{ item.priceNum | number:'1.2-2' }}</td>
+            <td>{{ item.totalNum | number:'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="normalizedItems.length === 0">
+            <td colspan="4" style="text-align: center;">Нет позиций в заказе</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="edit-btn" (click)="onEdit()">Изменить</button>
+      <button class="complete-btn" (click)="onComplete()" *ngIf="order?.status !== 'Завершён'">Завершить</button>
+      <button class="delete-btn" (click)="onDelete()">Удалить</button>
+      <button class="close-footer-btn" (click)="onClose()">Закрыть</button>
+    </div>
+  </div>
+</div>

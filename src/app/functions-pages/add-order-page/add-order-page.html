@@ -1,0 +1,108 @@
+<section class="add-order-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Управление заказами</p>
+      <h1>Новый заказ</h1>
+    </div>
+    <a routerLink="/orders" class="ghost-btn">← Назад к заказам</a>
+  </header>
+
+  <div class="form-container">
+    <div class="form-panel" [formGroup]="form">
+      <div class="form-grid">
+        <!-- Клиент -->
+        <label class="field">
+          <span>Имя клиента *</span>
+          <input type="text" formControlName="customer_name" placeholder="Иван Петров"
+                 [class.invalid]="submitted && form.get('customer_name')?.invalid">
+          <small *ngIf="submitted && form.get('customer_name')?.errors?.['required']" class="error">Обязательное поле</small>
+        </label>
+
+        <label class="field">
+    <span>Телефон</span>
+    <input type="tel" 
+         formControlName="customer_phone" 
+         placeholder="+7(906)-173-70-33"
+         (input)="onPhoneInput($event)"
+         maxlength="18">
+    <small *ngIf="submitted && form.get('customer_phone')?.errors?.['pattern']" class="error">
+    Формат: +7(XXX)-XXX-XX-XX
+  </small>
+</label>
+
+        <!-- Тип доставки -->
+        <label class="field">
+          <span>Тип доставки *</span>
+          <select formControlName="delivery_type">
+            <option value="Доставка">Доставка</option>
+            <option value="Самовывоз">Самовывоз</option>
+          </select>
+        </label>
+
+        <!-- Адрес (показывается только при доставке) -->
+        <label class="field" *ngIf="form.get('delivery_type')?.value === 'Доставка'">
+          <span>Адрес доставки *</span>
+          <input type="text" formControlName="address" placeholder="ул. Пушкина, д.10, кв.5"
+                 [class.invalid]="submitted && form.get('address')?.invalid">
+          <small *ngIf="submitted && form.get('address')?.errors?.['required']" class="error">Укажите адрес</small>
+        </label>
+
+        <!-- Дата/время -->
+        <label class="field">
+          <span>Срок выполнения *</span>
+          <input type="datetime-local" formControlName="due_at"
+                 [class.invalid]="submitted && form.get('due_at')?.invalid">
+        </label>
+
+        <!-- Комментарий -->
+        <label class="field full">
+          <span>Комментарий к заказу</span>
+          <textarea formControlName="comment" rows="2" placeholder="Особые пожелания..."></textarea>
+        </label>
+
+        <!-- Список товаров -->
+<!-- Список товаров -->
+<div class="field full items-section">
+  <span>Состав заказа</span>
+  <div formArrayName="items">
+  <div *ngFor="let item of items.controls; let i = index" class="item-row" [formGroupName]="i">
+    <select [formControlName]="'product_id'" class="item-product" (change)="onProductChange(i, $event)">
+      <option [value]="null">Выберите продукт</option>
+      <option *ngFor="let product of products" [value]="product.id">
+        {{ product.name }} — {{ product.price | number:'1.0-0' }} ₽ / {{ product.unit }}
+      </option>
+    </select>
+
+    <input type="number" [formControlName]="'quantity'" class="item-qty" step="0.5" min="0.5"
+           placeholder="Кол-во" (input)="onQuantityChange(i, $event)">
+
+    <span class="item-unit">шт</span>
+    <span class="item-price">{{ item.get('price')?.value | number:'1.0-0' }} ₽</span>
+    <span class="item-total">{{ item.get('total')?.value | number:'1.0-0' }} ₽</span>
+
+    <button type="button" class="remove-btn" (click)="removeItem(i)">×</button>
+  </div>
+</div>
+<button type="button" class="add-item-btn" (click)="addItem()">+ Добавить товар</button>
+<div class="order-total" *ngIf="items.length > 0">
+  <strong>Итого:</strong> {{ orderTotal | number:'1.0-0' }} ₽
+</div>
+</div>
+      </div>
+
+      <div *ngIf="success" class="notice success">
+        Заказ успешно создан! Перенаправление...
+      </div>
+      <div *ngIf="errorMessage" class="notice error">
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-btn" (click)="onSubmit()" [disabled]="success">
+          Создать заказ
+        </button>
+        <a routerLink="/orders" class="ghost-btn">Отмена</a>
+      </div>
+    </div>
+  </div>
+</section>

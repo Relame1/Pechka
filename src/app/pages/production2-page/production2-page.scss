@@ -1,0 +1,307 @@
+:host {
+  display: block;
+  background: #f4f4f5;
+  min-height: 100vh;
+  padding: 24px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 0;
+    font-size: 32px;
+  }
+  p {
+    margin: 4px 0 0;
+    color: #71717a;
+  }
+}
+
+.header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+
+  .icon-btn {
+    background: white;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    &:hover { background: #f4f4f5; }
+    svg { width: 20px; height: 20px; }
+  }
+  .notifications-bell {
+    position: relative;
+    cursor: pointer;
+    svg { width: 24px; height: 24px; }
+    .badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 50px;
+  color: #71717a;
+}
+.kanban-section, .ovens-section, .ingredients-section, .notifications-section {
+  margin-bottom: 32px;
+  h2 { font-size: 20px; margin: 0 0 16px; }
+}
+
+.kanban-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.kanban-col {
+  background: #fbfbfc;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  padding: 12px;
+  min-width: 200px;
+}
+
+.kanban-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid;
+  h3 { margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; }
+  .count { background: #09090b; color: white; border-radius: 20px; padding: 2px 8px; font-size: 12px; }
+}
+
+.status-pending { border-bottom-color: #71717a; }
+.status-preparing { border-bottom-color: #3b82f6; }
+.status-baking { border-bottom-color: #f59e0b; }
+.status-cooling { border-bottom-color: #10b981; }
+.status-packing { border-bottom-color: #8b5cf6; }
+.status-completed { border-bottom-color: #6b7280; }
+
+.kanban-cards {
+  min-height: 200px;
+}
+
+.kanban-card {
+  background: white;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+  cursor: grab;
+  &:active { cursor: grabbing; }
+  .card-title { font-weight: 600; margin-bottom: 4px; }
+  .card-meta { display: flex; justify-content: space-between; font-size: 12px; color: #71717a; }
+  .card-footer, .card-time { font-size: 11px; color: #3f3f46; margin-top: 6px; }
+}
+
+.kanban-empty {
+  text-align: center;
+  padding: 20px;
+  color: #a1a1aa;
+  font-size: 13px;
+}
+.ovens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.oven-card {
+  background: white;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  padding: 16px;
+  .oven-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; .oven-name { font-weight: 700; } .oven-temp { font-size: 18px; font-weight: 700; } }
+  .oven-task { margin-bottom: 8px; .label { color: #71717a; } .value { font-weight: 500; &.free { color: #22c55e; } } }
+  .oven-timer { margin: 8px 0; .timer-bar { height: 6px; background: #e4e4e7; border-radius: 3px; overflow: hidden; .timer-fill { height: 100%; background: #09090b; width: 0%; transition: width 1s linear; } } .timer-text { font-size: 12px; margin-top: 4px; display: block; } }
+  .oven-next { .label { color: #71717a; } .value { font-size: 13px; } }
+}
+.ingredients-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ingredient-item {
+  background: white;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 12px;
+  .ingredient-name { font-weight: 600; margin-bottom: 6px; }
+  .ingredient-stats { display: flex; gap: 16px; font-size: 13px; margin-bottom: 8px; .needed { color: #3f3f46; } .available { color: #71717a; } }
+  .stock-bar { height: 8px; background: #e4e4e7; border-radius: 4px; overflow: hidden; .stock-fill { height: 100%; background: #09090b; transition: width 0.3s; &.stock-low { background: #f59e0b; } &.stock-empty { background: #ef4444; } } }
+}
+.notifications-list {
+  background: white;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.notification-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e4e4e7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  &:last-child { border-bottom: none; }
+  &:hover { background: #f9f9f9; }
+  .notif-content { display: flex; flex-direction: column; .notif-message { font-size: 14px; } .notif-time { font-size: 11px; color: #71717a; margin-top: 4px; } }
+  .notif-badge { background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+}
+
+.notif-warning { border-left: 4px solid #f59e0b; }
+.notif-error { border-left: 4px solid #ef4444; }
+.notif-success { border-left: 4px solid #22c55e; }
+.notif-info { border-left: 4px solid #3b82f6; }
+
+.empty-notifications {
+  padding: 24px;
+  text-align: center;
+  color: #71717a;
+}
+
+@media (max-width: 1200px) {
+  .kanban-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.cdk-drag-preview {
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  opacity: 0.8;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.kanban-cards.cdk-drop-list-dragging .kanban-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.card-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+
+  .action-btn {
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: #e4e4e7;
+    }
+  }
+}
+
+.cooling-section {
+  margin-bottom: 32px;
+
+  h2 {
+    font-size: 20px;
+    margin: 0 0 16px;
+  }
+}
+
+.cooling-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.cooling-card {
+  background: white;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.cooling-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+
+  .cooling-name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .cooling-order {
+    font-size: 12px;
+    color: #71717a;
+  }
+}
+
+.cooling-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e4e4e7;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    transition: width 0.3s linear;
+  }
+  .cooling-time {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: right;
+  }
+}
+
+.cooling-empty {
+  text-align: center;
+  padding: 24px;
+  color: #71717a;
+  font-size: 14px;
+  background: white;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+}

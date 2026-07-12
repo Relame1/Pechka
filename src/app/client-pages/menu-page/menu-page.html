@@ -1,0 +1,97 @@
+<div class="menu-page">
+  <app-client-header></app-client-header>
+
+  <!-- Герой-секция -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Наше <span class="highlight">меню</span></h1>
+      <p class="hero-subtitle">Свежая выпечка из натуральных ингредиентов</p>
+    </div>
+  </section>
+
+  <!-- Категории и поиск -->
+  <section class="filters-section">
+    <div class="container">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Поиск по названию..." 
+          [(ngModel)]="searchQuery"
+          (input)="filterProducts()">
+        <button class="clear-search" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+      </div>
+      
+      <div class="categories-list">
+        <button 
+          class="category-btn" 
+          [class.active]="selectedCategory === 'all'"
+          (click)="selectCategory('all')">
+          Все
+        </button>
+        <button 
+          *ngFor="let cat of categories" 
+          class="category-btn"
+          [class.active]="selectedCategory === cat"
+          (click)="selectCategory(cat)">
+          {{ cat }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Товары -->
+  <section class="products-section">
+    <div class="container">
+      <div *ngIf="isLoading" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Загрузка меню...</p>
+      </div>
+      
+      <div *ngIf="!isLoading && filteredProducts.length === 0" class="empty-state">
+        <div class="empty-emoji">🥺</div>
+        <h3>Ничего не найдено</h3>
+        <p>Попробуйте изменить параметры поиска</p>
+        <button class="reset-btn" (click)="selectCategory('all'); clearSearch()">Сбросить фильтры</button>
+      </div>
+      
+      <div class="products-grid" *ngIf="!isLoading && filteredProducts.length > 0">
+        <div class="product-card" *ngFor="let product of filteredProducts">
+          <div class="product-badge" *ngIf="isNewProduct(product)">Новинка</div>
+          
+          <!-- Изображение продукта -->
+          <div class="product-image">
+            <img 
+              *ngIf="getProductImageUrl(product)" 
+              [src]="getProductImageUrl(product)" 
+              [alt]="product.name"
+              class="product-img"
+              (error)="product.image_url = ''; product.image = ''">
+            <div class="product-image-placeholder" *ngIf="!getProductImageUrl(product)">
+              <div class="placeholder-icon">{{ getProductIcon(product.category) }}</div>
+            </div>
+          </div>
+          
+          <h3 class="product-title">{{ product.name }}</h3>
+          <p class="product-description">{{ product.description || 'Свежая выпечка из натуральных ингредиентов' }}</p>
+          <div class="product-price">{{ product.price | number:'1.0-0' }} ₽</div>
+          <button class="add-to-cart" (click)="addToCart(product, $event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            В корзину
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-client-footer></app-client-footer>
+  <app-client-cart></app-client-cart>
+  <app-client-chat></app-client-chat>
+</div>

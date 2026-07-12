@@ -1,0 +1,283 @@
+<section class="statistics-page">
+  <!-- Заголовок с переключателем периода -->
+  <header class="page-header">
+    <div>
+      <p class="kicker">Аналитика</p>
+      <h1>Статистика</h1>
+    </div>
+    <div class="period-switcher">
+      <button [class.active]="activePeriod === 'today'" (click)="setPeriod('today')">Сегодня</button>
+      <button [class.active]="activePeriod === 'week'" (click)="setPeriod('week')">Неделя</button>
+      <button [class.active]="activePeriod === 'month'" (click)="setPeriod('month')">Месяц</button>
+    </div>
+  </header>
+
+  <!-- Карточки KPI -->
+  <div class="kpi-grid" *ngIf="!loading; else kpiSkeleton">
+    <div class="kpi-card">
+      <span>Выручка</span>
+      <strong>{{ kpi.revenue | number:'1.0-0' }} ₽</strong>
+      <small>+8% к прошлому периоду</small>
+    </div>
+    <div class="kpi-card dark">
+      <span>Заказы</span>
+      <strong>{{ kpi.orders }}</strong>
+      <small>+12%</small>
+    </div>
+    <div class="kpi-card">
+      <span>Средний чек</span>
+      <strong>{{ kpi.avgCheck | number:'1.0-0' }} ₽</strong>
+      <small>-2%</small>
+    </div>
+    <div class="kpi-card">
+      <span>Новые клиенты</span>
+      <strong>{{ kpi.newCustomers }}</strong>
+      <small>за период</small>
+    </div>
+    <div class="kpi-card">
+      <span>Возвраты</span>
+      <strong>{{ kpi.returns }}</strong>
+      <small>3.5% от заказов</small>
+    </div>
+    <div class="kpi-card">
+      <span>NPS</span>
+      <strong>{{ kpi.nps }}</strong>
+      <small>выше среднего</small>
+    </div>
+  </div>
+  <ng-template #kpiSkeleton>
+    <div class="kpi-grid">
+      <div class="kpi-card skeleton" *ngFor="let _ of skeletonCards">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Сетка: выручка по дням + по месяцам -->
+  <div class="charts-row">
+    <!-- Столбчатая диаграмма (неделя) -->
+    <div class="panel chart-panel">
+      <h3>Выручка по дням (неделя)</h3>
+      <div class="bar-chart" *ngIf="!loading && revenueByDay.length > 0; else skeletonBars">
+        <div class="bar-item" *ngFor="let day of revenueByDay">
+          <div class="bar-value">{{ day.value | number:'1.0-0' }} ₽</div>
+          <div class="bar" 
+               [style.height.%]="maxRevenueDay > 0 ? (day.value / maxRevenueDay) * 100 : 0">
+          </div>
+          <div class="bar-label">{{ day.day }}</div>
+        </div>
+      </div>
+      <div *ngIf="!loading && revenueByDay.length === 0" class="empty-data">
+        Нет данных за выбранный период
+      </div>
+    </div>
+
+    <!-- Линейный график (месяцы) -->
+    <div class="panel chart-panel">
+      <h3>Выручка по месяцам (год)</h3>
+      <div class="line-chart" *ngIf="!loading; else skeletonLine">
+        <div class="chart-container">
+          <svg viewBox="0 0 600 180" class="line-svg" preserveAspectRatio="xMidYMid meet">
+            <polyline
+              *ngIf="getPolylinePoints()"
+              [attr.points]="getPolylinePoints()"
+              fill="none"
+              stroke="#09090b"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <g *ngFor="let point of getCirclePositions(); let i = index">
+              <circle
+                *ngIf="point.show"
+                [attr.cx]="point.cx"
+                [attr.cy]="point.cy"
+                r="5"
+                fill="#09090b"
+                stroke="#fff"
+                stroke-width="2"
+                (mouseenter)="showTooltip($event, i)"
+                (mouseleave)="hideTooltip()"
+                style="cursor: pointer"
+              />
+            </g>
+          </svg>
+          <div class="line-labels">
+            <span *ngFor="let m of revenueByMonth; let i = index" [class.highlight]="m.value > 0">
+              {{ m.month }}
+            </span>
+          </div>
+        </div>
+        
+        <!-- Всплывающая подсказка -->
+        <div class="chart-tooltip" *ngIf="tooltipVisible" [style.left.px]="tooltipX" [style.top.px]="tooltipY">
+          <div class="tooltip-month">{{ tooltipData?.month }}</div>
+          <div class="tooltip-value">{{ tooltipData?.value | number:'1.0-0' }} ₽</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Сетка: популярные товары + источники + география -->
+  <div class="triple-grid">
+    <!-- Популярные товары -->
+    <div class="panel">
+      <h3>Популярные товары</h3>
+      <div class="horizontal-bars" *ngIf="!loading; else skeletonList">
+        <div class="h-bar-item" *ngFor="let prod of popularProducts">
+          <div class="h-bar-label">{{ prod.name }}</div>
+          <div class="h-bar-track">
+            <div class="h-bar-fill" [style.width.%]="(prod.orders / maxPopularOrders) * 100">
+              <span>{{ prod.orders }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Источники заказов (круговая) -->
+    <div class="panel">
+      <h3>Источники заказов</h3>
+      <div class="donut-container" *ngIf="!loading; else skeletonDonut">
+        <div class="donut" [style.background]="getConicGradient(sources)">
+          <div class="donut-hole">Всего</div>
+        </div>
+        <ul class="legend">
+          <li *ngFor="let s of sources">
+            <span class="legend-dot" [style.background]="s.color"></span>
+            {{ s.name }} — {{ s.percent }}%
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Топ категорий товаров -->
+    <div class="panel">
+      <h3>Топ категорий товаров</h3>
+      <div class="donut-container" *ngIf="!loading && topCategories.length > 0; else skeletonDonut">
+        <div class="donut" [style.background]="getConicGradient(topCategories)">
+          <div class="donut-hole">Всего</div>
+        </div>
+        <ul class="legend">
+          <li *ngFor="let cat of topCategories">
+            <span class="legend-dot" [style.background]="cat.color"></span>
+            {{ cat.name }} — {{ cat.percent }}% ({{ cat.revenue | number:'1.0-0' }} ₽)
+          </li>
+        </ul>
+      </div>
+      <div *ngIf="!loading && topCategories.length === 0" class="empty-data">
+        Нет данных за выбранный период
+      </div>
+    </div>
+  </div>
+
+  <!-- Воронка продаж + сотрудники -->
+  <div class="charts-row">
+    <!-- Воронка -->
+    <div class="panel">
+      <h3>Воронка продаж</h3>
+      <div class="funnel" *ngIf="!loading; else skeletonFunnel">
+        <div class="funnel-step" *ngFor="let step of funnel; let i = index">
+          <div class="funnel-bar" [style.width.%]="step.percent" [style.opacity]="1 - i * 0.06">
+            <span class="funnel-label">{{ step.stage }}</span>
+            <span class="funnel-value">{{ step.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Сотрудники -->
+    <div class="panel">
+      <h3>Эффективность сотрудников</h3>
+      <div class="table-wrap" *ngIf="!loading; else skeletonTable">
+        <table>
+          <thead>
+            <tr><th>Сотрудник</th><th>Заказов</th><th>Выручка</th><th>Эффективность</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of employees">
+              <td>{{ emp.name }}</td>
+              <td>{{ emp.orders }}</td>
+              <td>{{ emp.revenue | number }} ₽</td>
+              <td>
+                <div class="efficiency-bar">
+                  <div class="efficiency-fill" [style.width.%]="emp.efficiency"></div>
+                  <span>{{ emp.efficiency }}%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Загрузка производства + Прогноз -->
+  <div class="charts-row">
+    <!-- Загрузка цехов -->
+    <div class="panel">
+      <h3>Загрузка производства</h3>
+      <div class="load-bars" *ngIf="!loading && productionLoad.length > 0; else skeletonList">
+        <div class="load-item" *ngFor="let ws of productionLoad">
+          <div class="load-header">
+            <span>{{ ws.workshop }}</span>
+            <span>{{ ws.current }} / {{ ws.max }}</span>
+          </div>
+          <div class="load-track">
+            <div class="load-fill" [style.width.%]="(ws.current / ws.max) * 100" [style.background]="ws.color"></div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!loading && productionLoad.length === 0" class="empty-data">
+        Нет данных о производстве
+      </div>
+    </div>
+
+    <!-- Прогноз на неделю -->
+    <div class="panel">
+      <h3>Прогноз на следующую неделю</h3>
+      <div class="forecast-list" *ngIf="!loading; else skeletonList">
+        <div class="forecast-item" *ngFor="let f of forecast">
+          <div class="forecast-day">{{ f.day }}</div>
+          <div class="forecast-orders">{{ f.predicted }} заказов</div>
+          <div class="forecast-recommendation">{{ f.recommended }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Скелетоны -->
+<ng-template #skeletonBars>
+  <div class="skeleton-chart" style="height: 180px; display: flex; align-items: flex-end; gap: 8px;">
+    <div class="skeleton-bar" *ngFor="let _ of [1,2,3,4,5,6,7]" style="flex:1; height: 80%;"></div>
+  </div>
+</ng-template>
+<ng-template #skeletonLine>
+  <div class="skeleton-chart" style="height: 180px;"></div>
+</ng-template>
+<ng-template #skeletonDonut>
+  <div style="display:flex; align-items:center; gap:20px;">
+    <div class="skeleton-circle" style="width:80px; height:80px;"></div>
+    <div class="skeleton-lines" style="flex:1;">
+      <div class="skeleton-line" *ngFor="let _ of [1,2,3,4]"></div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #skeletonList>
+  <div class="skeleton-lines">
+    <div class="skeleton-line" *ngFor="let _ of skeletonRows"></div>
+  </div>
+</ng-template>
+<ng-template #skeletonFunnel>
+  <div class="skeleton-lines">
+    <div class="skeleton-line" *ngFor="let _ of skeletonRows" style="height: 30px; margin-bottom: 12px;"></div>
+  </div>
+</ng-template>
+<ng-template #skeletonTable>
+  <div class="skeleton-lines">
+    <div class="skeleton-line" *ngFor="let _ of skeletonRows" style="height: 20px; margin-bottom: 8px;"></div>
+  </div>
+</ng-template>

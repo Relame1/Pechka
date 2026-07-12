@@ -1,0 +1,62 @@
+<div class="orders-page">
+  <app-client-header></app-client-header>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Мои <span class="highlight">заказы</span></h1>
+      <p>История ваших заказов</p>
+    </div>
+  </section>
+
+  <section class="orders-section">
+    <div class="container">
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p>Загрузка заказов...</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="!isLoading && orders.length === 0" class="empty-orders">
+        <div class="empty-icon">📦</div>
+        <h3>У вас пока нет заказов</h3>
+        <a routerLink="/menu" class="btn-primary">Перейти в меню</a>
+      </div>
+
+      <div class="orders-list" *ngIf="orders.length > 0">
+        <div class="order-card" *ngFor="let order of orders">
+          <div class="order-header">
+            <div class="order-info">
+              <div class="order-number">Заказ №{{ order.id }}</div>
+              <div class="order-date">{{ order.created_at | date:'dd.MM.yyyy HH:mm' }}</div>
+            </div>
+            <div class="order-status" [class]="getStatusClass(order.status)">
+              {{ getStatusText(order.status) }}
+            </div>
+          </div>
+
+          <div class="order-items">
+            <div class="item" *ngFor="let item of order.items">
+              <span>{{ item.product_name }} × {{ item.quantity }}</span>
+              <span>{{ item.total | number:'1.0-0' }} ₽</span>
+            </div>
+          </div>
+
+          <div class="order-footer">
+            <div class="order-total">
+              Итого: <strong>{{ order.amount | number:'1.0-0' }} ₽</strong>
+            </div>
+            <button class="repeat-btn" (click)="repeatOrder(order)">
+              Повторить заказ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-client-footer></app-client-footer>
+  <app-client-chat></app-client-chat>
+</div>

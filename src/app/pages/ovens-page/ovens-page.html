@@ -1,0 +1,103 @@
+<section class="ovens-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Оборудование</p>
+      <h1>Печи</h1>
+    </div>
+    <button class="refresh-btn" (click)="refresh()" title="Обновить">🔄</button>
+  </header>
+
+  <div *ngIf="loading" class="loading-spinner">Загрузка...</div>
+
+  <div *ngIf="!loading" class="content-grid">
+    <!-- Статистика -->
+    <div class="stats-panel">
+      <h2>Статистика печей</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><span>Всего печей</span><strong>{{ totalOvens }}</strong></div>
+        <div class="stat-card"><span>Занято</span><strong>{{ busyOvens }}</strong></div>
+        <div class="stat-card"><span>Свободно</span><strong>{{ freeOvens }}</strong></div>
+        <div class="stat-card"><span>Загрузка</span><strong>{{ averageLoad }}%</strong></div>
+      </div>
+    </div>
+
+    <!-- План на сегодня -->
+    <div class="plan-panel">
+      <h2>План на сегодня</h2>
+      <div *ngIf="planSummary.length === 0" class="empty-plan">Нет запланированных выпечек</div>
+      <div class="plan-list" *ngIf="planSummary.length > 0">
+        <div class="plan-item" *ngFor="let item of planSummary">
+          <span class="plan-name">{{ item.name }}</span>
+          <span class="plan-qty">{{ item.quantity }} {{ item.unit }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Печи -->
+    <div class="ovens-section">
+      <h2>Печи</h2>
+      <div class="ovens-grid">
+        <div class="oven-card" *ngFor="let oven of ovens">
+          <div class="oven-header">
+            <span class="oven-name">{{ oven.name }}</span>
+            <span class="oven-temp">{{ oven.temperature }}°C</span>
+          </div>
+          <div class="oven-status">
+            <span class="label">Сейчас:</span>
+            <span class="value" [class.free]="!oven.currentTask">
+              {{ oven.currentTask?.productName || 'Свободна' }}
+            </span>
+          </div>
+          <div class="oven-timer" *ngIf="oven.currentTask && oven.remainingSeconds != null">
+            <div class="timer-bar">
+              <div class="timer-fill" [style.width.%]="(oven.remainingSeconds / (oven.totalSeconds || 600)) * 100"></div>
+            </div>
+            <span class="timer-text">Осталось: {{ formatRemaining(oven.remainingSeconds) }}</span>
+          </div>
+          <div class="oven-actions" *ngIf="oven.currentTask">
+            <button class="release-btn" (click)="releaseOven(oven)">Освободить</button>
+          </div>
+        </div>
+        <div *ngIf="ovens.length === 0" class="empty-state">Нет данных о печах</div>
+      </div>
+    </div>
+
+    <!-- Очередь задач (ТАБЛИЦА) -->
+    <div class="queue-section">
+      <h2>Очередь задач</h2>
+      <div *ngIf="pendingTasks.length === 0" class="empty-queue">Нет задач, ожидающих выпечки</div>
+      <table class="queue-table" *ngIf="pendingTasks.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Продукт</th>
+            <th>Заказ</th>
+            <th>Кол-во</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let task of pendingTasks; let i = index">
+            <td class="num">{{ i+1 }}</td>
+            <td class="name">{{ task.productName }}</td>
+            <td class="order">{{ task.orderCode }}</td>
+            <td class="qty">{{ task.quantity }} {{ task.unit }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Недавно завершённые (таблица для единообразия) -->
+    <div class="completed-section">
+      <h2>Недавно завершённые</h2>
+      <div *ngIf="recentCompleted.length === 0" class="empty-completed">Нет завершённых задач</div>
+      <table class="completed-table" *ngIf="recentCompleted.length > 0">
+        <tbody>
+          <tr *ngFor="let task of recentCompleted">
+            <td class="name">{{ task.productName }}</td>
+            <td class="order">{{ task.orderCode }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

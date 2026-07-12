@@ -1,0 +1,55 @@
+<section class="baking-log-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Архив</p>
+      <h1>Журнал выпечки</h1>
+    </div>
+    <button class="refresh-btn" (click)="loadLog()" title="Обновить">🔄</button>
+  </header>
+
+  <div class="filters-panel">
+    <div class="filter-group">
+      <input type="text" placeholder="Поиск по продукту или заказу" [(ngModel)]="searchQuery" (input)="applyFilters()">
+    </div>
+    <div class="filter-group">
+      <label>С даты:</label>
+      <input type="date" [(ngModel)]="startDate" (change)="applyFilters()">
+    </div>
+    <div class="filter-group">
+      <label>По дату:</label>
+      <input type="date" [(ngModel)]="endDate" (change)="applyFilters()">
+    </div>
+    <button class="reset-btn" (click)="resetFilters()">Сбросить</button>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">Загрузка...</div>
+
+  <div *ngIf="!loading && filteredTasks.length === 0" class="empty-state">
+    Нет завершённых задач
+  </div>
+
+  <div *ngIf="!loading && filteredTasks.length > 0" class="table-wrap">
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>Дата завершения</th>
+          <th>Продукт</th>
+          <th>Заказ</th>
+          <th>Количество</th>
+          <th>Температура</th>
+          <th>Время выпечки</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let task of filteredTasks">
+          <td class="date">{{ formatDate(task.finishedAt || task.createdAt) }}</td>
+          <td class="product">{{ task.productName }}</td>
+          <td class="order">{{ task.orderCode }}</td>
+          <td class="qty">{{ task.quantity }} {{ task.unit }}</td>
+          <td class="temp">{{ task.bakingTemperature || '—' }} °C</td>
+          <td class="time">{{ task.bakingTimeMinutes || '—' }} мин</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

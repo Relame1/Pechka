@@ -1,0 +1,91 @@
+<section class="customers-page">
+  <!-- Заголовок -->
+  <header class="page-header">
+    <div>
+      <p class="kicker">Клиентская база</p>
+      <h1>Клиенты</h1>
+    </div>
+  </header>
+
+  <!-- Карточки статистики -->
+  <div class="stats-grid" *ngIf="!loading; else statsSkeleton">
+    <div class="stat-card">
+      <span>Всего клиентов</span>
+      <strong>{{ stats.total }}</strong>
+      <small>в базе</small>
+    </div>
+    <div class="stat-card dark">
+      <span>Активных в этом месяце</span>
+      <strong>{{ stats.activeThisMonth }}</strong>
+      <small>сделали заказ</small>
+    </div>
+    <div class="stat-card">
+      <span>Новых за месяц</span>
+      <strong>{{ stats.newThisMonth }}</strong>
+      <small>первый заказ</small>
+    </div>
+    <div class="stat-card">
+      <span>Средний чек</span>
+      <strong>{{ stats.avgCheck | number:'1.0-0' }} ₽</strong>
+      <small>по всем клиентам</small>
+    </div>
+  </div>
+  <ng-template #statsSkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of [1,2,3,4]">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Поиск -->
+  <div class="search-row">
+    <input
+      type="text"
+      placeholder="Поиск по имени, телефону, email или адресу..."
+      [(ngModel)]="searchQuery"
+      (input)="onSearchChange()"
+    />
+  </div>
+
+  <!-- Таблица клиентов -->
+  <div class="panel table-panel">
+    <h3>Список клиентов</h3>
+    <div class="table-wrap" *ngIf="!loading; else tableSkeleton">
+      <table>
+        <thead>
+          <tr>
+            <th>Имя</th>
+            <th>Телефон</th>
+            <th>Email</th>
+            <th>Заказов</th>
+            <th>Потрачено</th>
+            <th>Последний заказ</th>
+            <th>Адрес</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let customer of filteredCustomersList">
+            <td class="customer-name">{{ customer.name }}</td>
+            <td>{{ customer.phone || '—' }}</td>
+            <td>{{ customer.email || '—' }}</td>
+            <td>{{ customer.totalOrders }}</td>
+            <td class="amount">{{ customer.totalSpent | number:'1.0-0' }} ₽</td>
+            <td>{{ customer.lastOrderDate || '—' }}</td>
+            <td>{{ customer.address || '—' }}</td>
+          </tr>
+          <tr *ngIf="filteredCustomersList.length === 0">
+            <td colspan="7" class="empty-message">Клиенты не найдены</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #tableSkeleton>
+      <div class="skeleton-lines">
+        <div class="skeleton-line" *ngFor="let _ of skeletonRows"></div>
+      </div>
+    </ng-template>
+  </div>
+</section>

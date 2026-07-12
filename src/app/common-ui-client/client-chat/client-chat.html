@@ -1,0 +1,61 @@
+<!-- src/app/common-ui-client/client-chat/client-chat.html -->
+
+<!-- Кнопка чата -->
+<div class="chat-button" (click)="toggleChat()" [class.has-unread]="unreadCount > 0">
+  <div class="chat-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  </div>
+  <span class="unread-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+</div>
+
+<!-- Окно чата -->
+<div class="chat-window" [class.open]="isOpen">
+  <div class="chat-header">
+    <h3>Поддержка</h3>
+    <button class="close-btn" (click)="closeChat()">✕</button>
+  </div>
+  
+  <div class="chat-messages" #messagesContainer>
+    <div *ngIf="messages.length === 0" class="empty-chat">
+      <div class="empty-icon">💬</div>
+      <p>Задайте ваш вопрос</p>
+      <small>Мы ответим в ближайшее время</small>
+    </div>
+    
+    <div *ngFor="let msg of messages" class="message-item" [class.my-message]="isMyMessage(msg)">
+      <div class="message-header">
+        <span class="message-user">{{ msg.user_name }}</span>
+        <span class="message-time">{{ formatTime(msg.created_at) }}</span>
+      </div>
+      <div class="message-text">{{ msg.message }}</div>
+      <div class="message-status" *ngIf="isMyMessage(msg)">
+        <span *ngIf="!msg.is_read" class="status-unread">📤 Отправлено</span>
+        <span *ngIf="msg.is_read" class="status-read">✓ Прочитано</span>
+      </div>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-indicator">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+  
+  <div class="chat-input">
+    <textarea 
+      [(ngModel)]="newMessage" 
+      placeholder="Введите ваше сообщение..."
+      rows="1"
+      (keydown.enter)="onEnterPress()"
+      (input)="autoResize($event)"
+      class="message-input"></textarea>
+    <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim() || isLoading">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>

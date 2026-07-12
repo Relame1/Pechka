@@ -1,0 +1,18 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Булочка",
+      "description": "Мягкая домашняя булочка.",
+      "avatarUrl": "https://images.unsplash.com/photo-1509440159596-0249088772ff",
+      "tag": ["Сладкое", "Домашняя"]
+    },
+    {
+      "id": 2,
+      "name": "Пирожок",
+      "description": "Свежий пирожок с начинкой.",
+      "avatarUrl": "https://images.unsplash.com/photo-1608198093002-ad4e005484ec",
+      "tag": ["Выпечка", "Сытное"]
+    }
+  ]
+}

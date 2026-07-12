@@ -1,0 +1,293 @@
+<section class="dashboard-page">
+  <!-- Заголовок -->
+  <header class="page-header">
+    <div>
+      <p class="kicker">Обзор</p>
+      <h1>Панель</h1>
+    </div>
+    <div class="date-badge">
+      {{ today | date:'dd MMMM yyyy' }}
+    </div>
+  </header>
+
+  <!-- Ряд 1: Основные карточки статистики -->
+  <div class="stats-grid" *ngIf="!loading && stats; else statsSkeleton">
+    <div class="stat-card">
+      <span>Заказов сегодня</span>
+      <strong>{{ stats.total_orders_today }}</strong>
+      <small>+12% ко вчерашнему дню</small>
+    </div>
+    <div class="stat-card dark">
+      <span>Выручка сегодня</span>
+      <strong>{{ stats.revenue_today | number:'1.0-0' }} ₽</strong>
+      <small>средний чек {{ stats.avg_check | number:'1.0-0' }} ₽</small>
+    </div>
+    <div class="stat-card">
+      <span>Новых клиентов</span>
+      <strong>{{ stats.new_customers }}</strong>
+      <small>за последние 24 часа</small>
+    </div>
+    <div class="stat-card">
+      <span>Завершённых</span>
+      <strong>19</strong>
+      <small>из 24</small>
+    </div>
+  </div>
+  <ng-template #statsSkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of skeletonCards">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Ряд 2: Расширенные метрики -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <span>Среднее время приготовления</span>
+      <strong>{{ extendedStats.avg_prep_time }}</strong>
+    </div>
+    <div class="metric-card">
+      <span>Выполнено вовремя</span>
+      <strong>{{ extendedStats.on_time_percent }}%</strong>
+    </div>
+    <div class="metric-card">
+      <span>Активных заказов</span>
+      <strong>{{ extendedStats.active_orders }}</strong>
+    </div>
+    <div class="metric-card">
+      <span>Курьеров в доставке</span>
+      <strong>{{ extendedStats.couriers }}</strong>
+    </div>
+  </div>
+
+  <!-- Основная двухколоночная сетка -->
+  <div class="dashboard-grid">
+    <!-- Левая колонка -->
+    <div class="grid-left">
+<!-- График активности за неделю (столбцы) -->
+<div class="panel activity-panel">
+  <h3>Активность за неделю</h3>
+  <div class="bar-chart" *ngIf="!loading && activityBars.length > 0; else chartSkeleton">
+    <div class="bar-item" *ngFor="let bar of activityBars">
+      <div class="bar-value">{{ bar.orders }}</div>
+      <div class="bar" 
+           [style.height.%]="maxOrders > 0 ? (bar.orders / maxOrders) * 100 : 0">
+      </div>
+      <div class="bar-label">{{ bar.day }}</div>
+    </div>
+  </div>
+  <ng-template #chartSkeleton>
+    <div class="skeleton-chart">
+      <div class="skeleton-bar" *ngFor="let _ of skeletonBars"></div>
+    </div>
+  </ng-template>
+</div>
+
+<!-- Линейный график продаж с зумом -->
+<div class="panel sales-panel">
+  <div class="chart-header">
+    <h3>Выручка по дням</h3>
+    <div class="chart-controls">
+      <span class="zoom-level">{{ viewMode === 'months' ? 'по месяцам' : zoomLevel + ' дн.' }}</span>
+    </div>
+  </div>
+  
+  <div class="line-chart" #lineChartContainer>
+    <div class="chart-wrapper" *ngIf="!loading && filteredChartData.length && maxSalesValue > 0; else lineSkeleton">
+      <!-- Ось Y (вертикальная) -->
+      <div class="chart-y-axis">
+        <div class="y-axis-label">Выручка, ₽</div>
+        <div class="y-axis-ticks">
+          <div class="y-tick" *ngFor="let tick of getYAxisTicks()">
+            {{ tick | number:'1.0-0' }} ₽
+          </div>
+        </div>
+      </div>
+      
+      <!-- График -->
+      <div class="chart-main">
+        <svg viewBox="0 0 600 200" class="line-svg" preserveAspectRatio="xMidYMid meet">
+          <polyline
+            *ngIf="filteredChartData.length > 1"
+            [attr.points]="getPolylinePoints()"
+            fill="none"
+            stroke="#f59e0b"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <g *ngFor="let point of filteredChartData; let i = index">
+            <circle
+              [attr.cx]="getCirclePositions()[i]?.cx"
+              [attr.cy]="getCirclePositions()[i]?.cy"
+              r="4"
+              fill="#f59e0b"
+              stroke="#fff"
+              stroke-width="2"
+              (mouseenter)="showTooltip($event, point)"
+              (mouseleave)="hideTooltip()"
+            />
+          </g>
+        </svg>
+        
+        <!-- Ось X (горизонтальная) -->
+        <div class="chart-x-axis">
+          <div class="x-axis-label">Дата</div>
+          <div class="x-axis-ticks">
+            <div class="x-tick" *ngFor="let point of filteredChartData">
+              {{ point.displayDate }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #lineSkeleton>
+      <div class="skeleton-chart" style="height: 280px;"></div>
+    </ng-template>
+  </div>
+  
+  <!-- Подсказка при наведении -->
+  <div class="chart-tooltip" *ngIf="tooltipVisible" [style.left.px]="tooltipX" [style.top.px]="tooltipY">
+    <strong>{{ tooltipData?.displayDate }}</strong>
+    <span>{{ tooltipData?.value | number:'1.0-0' }} ₽</span>
+  </div>
+</div>
+
+<!-- Последние заказы -->
+<div class="panel recent-orders">
+  <h3>Последние заказы</h3>
+  <div class="order-list" *ngIf="!loading; else ordersSkeleton">
+    <div class="order-item" *ngFor="let order of recentOrders">
+      <div class="order-info">
+        <div class="order-code">{{ order.code }}</div>
+        <div class="order-customer">{{ order.customer_name }}</div>
+      </div>
+      <div class="order-type">
+        <span class="type-icon" [title]="order.delivery_type">
+          {{ order.delivery_type === 'Доставка' ? 'Доставка' : 'Самовывоз' }}
+        </span>
+      </div>
+      <div class="order-status">
+        <span class="status-pill" [ngClass]="getStatusClass(order.status)">
+          {{ order.status }}
+        </span>
+      </div>
+      <div class="order-amount">{{ order.amount | number:'1.0-0' }} ₽</div>
+      <div class="order-time">{{ order.time }}</div>
+      <a [routerLink]="['/orders', order.id]" class="action-link">→</a>
+    </div>
+  </div>
+  <ng-template #ordersSkeleton>
+    <div class="skeleton-orders">
+      <div class="skeleton-line" *ngFor="let _ of skeletonRows"></div>
+    </div>
+  </ng-template>
+  <a routerLink="/orders" class="view-all">Все заказы →</a>
+</div>
+
+      <!-- Заказы по часам -->
+      <div class="panel hourly-panel">
+        <h3>Заказы по часам (сегодня)</h3>
+        <div class="hourly-chart" *ngIf="!loading && hourlyOrders.length && maxHourlyCount > 0; else skeletonHourly">
+          <div class="hourly-bar-item" *ngFor="let h of hourlyOrders">
+            <div class="hourly-bar-value">{{ h.count }}</div>
+            <div class="hourly-bar" [style.height.%]="(h.count / maxHourlyCount) * 100"></div>
+            <div class="hourly-bar-label">{{ h.hour }}</div>
+          </div>
+        </div>
+        <ng-template #skeletonHourly>
+          <div class="skeleton-chart" style="height: 120px;"></div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="grid-right">
+      <!-- Популярные товары -->
+      <div class="panel popular-panel">
+        <h3>Популярные товары</h3>
+        <ul class="popular-list" *ngIf="!loading; else popularSkeleton">
+          <li *ngFor="let product of popular">
+            <div class="popular-info">
+              <span class="popular-name">{{ product.name }}</span>
+              <span class="popular-sold">Продано: {{ product.sold }} шт.</span>
+            </div>
+            <span class="trend" [ngClass]="getTrendClass(product.trend)">
+              {{ getTrendIcon(product.trend) }}
+            </span>
+          </li>
+        </ul>
+        <ng-template #popularSkeleton>
+          <div class="skeleton-lines">
+            <div class="skeleton-line" *ngFor="let _ of [1,2,3,4]"></div>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Распределение по источникам -->
+      <div class="panel source-panel">
+        <h3>Источники заказов</h3>
+        <div class="donut-container" *ngIf="!loading; else skeletonDonut">
+          <div class="donut-chart" [style.background]="getConicGradient(getSourceColors())">
+            <div class="donut-hole">Всего</div>
+          </div>
+          <ul class="source-legend">
+            <li *ngFor="let s of sourceDistribution; let i = index">
+              <span class="legend-dot" [style.background]="getSourceColors()[i]?.color || '#09090b'"></span>
+              {{ s.source }} — {{ s.percent }}%
+            </li>
+          </ul>
+        </div>
+        <ng-template #skeletonDonut>
+          <div style="display: flex; align-items: center; gap: 24px;">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines" style="flex:1;">
+              <div class="skeleton-line" *ngFor="let _ of [1,2,3]"></div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Карточка предзаготовки -->
+      <div class="panel prep-card">
+        <div class="prep-indicator">
+          <span class="prep-dot"></span>
+          <span>Следующая предзаготовка</span>
+        </div>
+        <strong>{{ nextPrep }}</strong>
+        <p>Планируется на основе прогноза продаж. Запасов хватит на 3 дня.</p>
+        <a routerLink="/production" class="action-link">Перейти к производству →</a>
+      </div>
+
+      <!-- Ингредиенты на исходе -->
+      <div class="panel low-stock-panel">
+        <h3>Ингредиенты на исходе</h3>
+        <ul class="low-stock-list" *ngIf="!loading; else skeletonLowStock">
+          <li *ngFor="let item of lowStock">
+            <div class="stock-info">
+              <span class="stock-name">{{ item.ingredient }}</span>
+              <span class="stock-level">
+                {{ item.stock }} {{ item.unit }} / мин. {{ item.min }} {{ item.unit }}
+              </span>
+            </div>
+            <div class="stock-bar-bg">
+              <div
+                class="stock-bar-fill"
+                [style.width.%]="(item.stock / item.min) * 100"
+                [class.critical]="item.stock <= item.min"
+              ></div>
+            </div>
+          </li>
+        </ul>
+        <ng-template #skeletonLowStock>
+          <div class="skeleton-lines">
+            <div class="skeleton-line" *ngFor="let _ of [1,2,3]"></div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</section>

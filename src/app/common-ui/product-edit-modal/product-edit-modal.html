@@ -1,0 +1,84 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Редактирование продукта</h3>
+    
+    <!-- Индикатор загрузки данных продукта -->
+    <div *ngIf="loadingProduct" class="loading-info">
+      Загрузка данных продукта...
+    </div>
+    
+    <!-- Основная форма, появляется только после загрузки -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loadingProduct && form">
+      <div class="form-grid">
+        <label class="field">
+          <span>Артикул *</span>
+          <input type="text" formControlName="article">
+        </label>
+        <label class="field">
+          <span>Название *</span>
+          <input type="text" formControlName="name">
+        </label>
+        <label class="field">
+          <span>Категория *</span>
+          <select formControlName="category">
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Цена *</span>
+          <input type="number" step="0.01" formControlName="price">
+        </label>
+        <label class="field">
+          <span>Единица *</span>
+          <select formControlName="unit">
+            <option *ngFor="let u of units" [value]="u">{{ u }}</option>
+          </select>
+        </label>
+        <label class="field full">
+          <span>Описание</span>
+          <textarea formControlName="description" rows="3"></textarea>
+        </label>
+        <label class="field">
+          <span>Время приготовления (мин)</span>
+          <input type="number" formControlName="prep_time">
+        </label>
+        <label class="field">
+          <span>Калории</span>
+          <input type="number" formControlName="calories">
+        </label>
+        <label class="field full">
+          <span>URL изображения</span>
+          <input type="text" formControlName="image">
+        </label>
+      </div>
+
+      <!-- Блок ингредиентов -->
+      <div class="ingredients-section">
+        <span>Состав продукта (ингредиенты)</span>
+        <div *ngIf="loadingIngredients" class="loading-hint">Загрузка списка ингредиентов...</div>
+        <div formArrayName="ingredients" *ngIf="!loadingIngredients">
+          <div *ngFor="let ing of ingredients.controls; let i = index" [formGroupName]="i" class="ingredient-row">
+            <select class="ing-name" formControlName="ingredient_id" (change)="onIngredientChange(i, $event)">
+              <option value="">Выберите ингредиент</option>
+              <option *ngFor="let ingredient of allIngredients" [value]="ingredient.id">
+                {{ ingredient.name }} ({{ ingredient.category }})
+              </option>
+            </select>
+            <input type="number" step="0.1" formControlName="quantity" placeholder="Кол-во" class="ing-qty">
+            <span class="ing-unit">{{ ing.get('unit')?.value }}</span>
+            <button type="button" class="remove-btn" (click)="removeIngredient(i)">×</button>
+          </div>
+        </div>
+        <button type="button" class="add-ingredient-btn" (click)="addIngredient()">+ Добавить ингредиент</button>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="primary-btn" [disabled]="loading || form.invalid">
+          {{ loading ? 'Сохранение...' : 'Сохранить' }}
+        </button>
+        <button type="button" class="ghost-btn" (click)="onClose()" [disabled]="loading">Отмена</button>
+      </div>
+      <div *ngIf="loading" class="spinner"></div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,194 @@
+<div class="profile-page">
+  <app-client-header></app-client-header>
+
+  <!-- Герой-секция -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Мой <span class="highlight">профиль</span></h1>
+      <p class="hero-subtitle">Управление личными данными</p>
+    </div>
+  </section>
+
+  <section class="profile-section">
+    <div class="container">
+      <div class="profile-grid">
+        <!-- Левая колонка - Аватар и информация -->
+        <div class="profile-sidebar">
+          <div class="avatar-card">
+            <div class="avatar-large">{{ getInitials() }}</div>
+            <h3>{{ user?.name || 'Пользователь' }}</h3>
+            <p class="user-role">Клиент</p>
+            <p class="user-email">{{ user?.email }}</p>
+          </div>
+          
+          <div class="info-card">
+            <h4>Информация</h4>
+            <div class="stat-item">
+              <span class="stat-label">Дата регистрации:</span>
+              <span class="stat-value">{{ (user?.created_at | date:'dd.MM.yyyy') || '—' }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Статус:</span>
+              <span class="stat-value" [class.status-active]="isEmailVerified()" [class.status-pending]="!isEmailVerified()">
+                {{ isEmailVerified() ? 'Подтверждён' : 'Не подтверждён' }}
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Способ входа:</span>
+              <span class="stat-value">
+                {{ isYandexUser() ? 'Яндекс ID' : 'Email + Пароль' }}
+              </span>
+            </div>
+            <div class="stat-item" *ngIf="!isYandexUser()">
+              <span class="stat-label">Пароль:</span>
+              <span class="stat-value">Установлен</span>
+            </div>
+            <div class="stat-item" *ngIf="isYandexUser()">
+              <span class="stat-label">Пароль:</span>
+              <span class="stat-value status-warning">Не установлен</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Правая колонка - Форма редактирования -->
+        <div class="profile-form-container">
+          <div class="form-card">
+            <h2>Редактирование профиля</h2>
+            
+            <!-- Сообщения об успехе/ошибке -->
+            <div *ngIf="successMessage" class="alert success">
+              {{ successMessage }}
+            </div>
+            <div *ngIf="errorMessage" class="alert error">
+              {{ errorMessage }}
+            </div>
+            
+            <!-- Спиннер загрузки -->
+            <div *ngIf="isLoading" class="text-center py-5">
+              <div class="spinner"></div>
+              <p class="mt-2">Загрузка...</p>
+            </div>
+            
+            <!-- Форма -->
+            <form *ngIf="!isLoading" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="form-group">
+                <label>Имя *</label>
+                <input 
+                  type="text" 
+                  formControlName="name" 
+                  placeholder="Ваше имя"
+                  [class.invalid]="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+                <div class="error-hint" *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+                  <span *ngIf="profileForm.get('name')?.errors?.['required']">Имя обязательно</span>
+                  <span *ngIf="profileForm.get('name')?.errors?.['minlength']">Минимум 2 символа</span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>Email *</label>
+                <input 
+                  type="email" 
+                  formControlName="email" 
+                  placeholder="your@email.com"
+                  [class.invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+                <div class="error-hint" *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+                  <span *ngIf="profileForm.get('email')?.errors?.['required']">Email обязателен</span>
+                  <span *ngIf="profileForm.get('email')?.errors?.['email']">Введите корректный email</span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+  <label>Телефон</label>
+  <input 
+    type="tel" 
+    formControlName="phone" 
+    placeholder="+7(906)-173-70-33"
+    (input)="onPhoneInput($event)"
+    maxlength="18"
+    [class.invalid]="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched">
+  <div class="error-hint" *ngIf="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched">
+    Формат: +7(XXX)-XXX-XX-XX
+  </div>
+</div>
+              
+              <div class="form-group">
+                <label>Адрес доставки</label>
+                <input 
+                  type="text" 
+                  formControlName="address" 
+                  placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
+                  [class.invalid]="profileForm.get('address')?.invalid && profileForm.get('address')?.touched">
+                <div class="error-hint" *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched">
+                  Введите адрес доставки
+                </div>
+              </div>
+              
+              <!-- Блок смены пароля - только для пользователей с паролем -->
+              <ng-container *ngIf="!isYandexUser()">
+                <div class="divider">
+                  <span>Смена пароля</span>
+                </div>
+                
+                <div class="form-group">
+                  <label>Текущий пароль</label>
+                  <input 
+                    type="password" 
+                    formControlName="current_password" 
+                    placeholder="Введите текущий пароль">
+                </div>
+                
+                <div class="form-group">
+                  <label>Новый пароль</label>
+                  <input 
+                    type="password" 
+                    formControlName="new_password" 
+                    placeholder="Минимум 6 символов"
+                    [class.invalid]="profileForm.get('new_password')?.invalid && profileForm.get('new_password')?.touched">
+                  <div class="error-hint" *ngIf="profileForm.get('new_password')?.invalid && profileForm.get('new_password')?.touched">
+                    Минимум 6 символов
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label>Подтверждение пароля</label>
+                  <input 
+                    type="password" 
+                    formControlName="confirm_password" 
+                    placeholder="Повторите новый пароль"
+                    [class.invalid]="profileForm.errors?.['mismatch'] && profileForm.get('confirm_password')?.touched">
+                  <div class="error-hint" *ngIf="profileForm.errors?.['mismatch'] && profileForm.get('confirm_password')?.touched">
+                    Пароли не совпадают
+                  </div>
+                </div>
+              </ng-container>
+              
+              <!-- Сообщение для Яндекс пользователей -->
+              <div *ngIf="isYandexUser()" class="info-message">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>Вы вошли через Яндекс ID. Для установки пароля используйте функцию "Забыли пароль?" на странице входа.</span>
+              </div>
+              
+              <div class="form-actions">
+                <button type="submit" class="btn-primary" [disabled]="isSaving || profileForm.invalid">
+                  {{ isSaving ? 'Сохранение...' : 'Сохранить изменения' }}
+                </button>
+                <button type="button" class="btn-secondary" (click)="cancelEdit()">
+                  Отмена
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-client-footer></app-client-footer>
+  <app-client-cart></app-client-cart>
+  <app-client-chat></app-client-chat>
+</div>

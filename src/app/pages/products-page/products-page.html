@@ -1,0 +1,137 @@
+<section class="products-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Ассортимент</p>
+      <h1>Продукты</h1>
+    </div>
+    <button class="primary-btn" routerLink="/products/new">
+      + Новый продукт
+    </button>
+  </header>
+
+  <!-- Статистика -->
+  <div class="stats-grid" *ngIf="!loading; else statsSkeleton">
+    <div class="stat-card">
+      <span>Всего продуктов</span>
+      <strong>{{ products.length }}</strong>
+      <small>в ассортименте</small>
+    </div>
+    <div class="stat-card dark">
+      <span>В наличии</span>
+      <strong>{{ inStockCount }}</strong>
+      <small>доступны к заказу</small>
+    </div>
+    <div class="stat-card">
+      <span>Нет в наличии</span>
+      <strong>{{ outOfStockCount }}</strong>
+      <small>закончились</small>
+    </div>
+    <div class="stat-card">
+      <span>Средняя цена</span>
+      <strong>{{ averagePrice | number:'1.0-0' }} ₽</strong>
+      <small>за единицу</small>
+    </div>
+  </div>
+
+  <ng-template #statsSkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of [1,2,3,4]">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Поиск и фильтры -->
+  <div class="filters-row">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Поиск по названию..."
+        [(ngModel)]="searchQuery"
+        (input)="filterProducts()"
+      />
+    </div>
+    <div class="category-filters">
+      <button class="filter-chip" [class.active]="!selectedCategory" (click)="selectCategory('')">Все</button>
+      <button *ngFor="let cat of categories" 
+              class="filter-chip"
+              [class.active]="selectedCategory === cat"
+              (click)="selectCategory(cat)">
+        {{ cat }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Сетка продуктов -->
+  <div class="products-grid" *ngIf="!loading; else productsSkeleton">
+    <div class="product-card" 
+         *ngFor="let product of filteredProducts" 
+         (click)="openProductModal(product)">
+      
+      <div class="product-image">
+        <div class="image-placeholder" *ngIf="!product.image_url && !product.image">
+          {{ product.name.charAt(0) }}
+        </div>
+        <img [src]="product.image_url || ('http://localhost:8000/storage/' + product.image)"
+             *ngIf="product.image_url || product.image"
+             class="product-img"
+             [alt]="product.name"
+             (error)="product.image_url = ''; product.image = ''">
+        
+        <span class="product-badge"
+              [class.in-stock]="product.in_stock"
+              [class.out-of-stock]="!product.in_stock">
+          {{ product.in_stock ? 'В наличии' : 'Нет' }}
+        </span>
+      </div>
+      
+      <div class="product-body">
+        <span class="product-category">{{ product.category }}</span>
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-article">Арт: {{ product.article }}</p>
+        <p class="product-desc">{{ product.description }}</p>
+        
+        <div class="product-footer">
+          <span class="product-price">{{ product.price | number:'1.0-0' }} ₽</span>
+          <button class="delete-btn" 
+                  (click)="$event.stopPropagation(); deleteProduct(product.id!)">
+            Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-result" *ngIf="filteredProducts.length === 0">
+      Продукты не найдены
+    </div>
+  </div>
+
+  <ng-template #productsSkeleton>
+    <div class="products-grid">
+      <div class="product-card skeleton-card" *ngFor="let _ of skeletonCards">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line w-70"></div>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Модальное окно деталей продукта -->
+  <app-product-modal 
+    *ngIf="showModal" 
+    [product]="selectedProduct" 
+    (close)="closeModal()"
+    (edit)="openEditModal($event)">
+  </app-product-modal>
+
+  <!-- Модальное окно редактирования продукта -->
+  <app-product-edit-modal
+    [product]="editProduct"
+    [visible]="showEditModal"
+    [loading]="isUpdatingProduct"
+    (close)="closeEditModal()"
+    (save)="updateProduct($event)">
+  </app-product-edit-modal>
+</section>

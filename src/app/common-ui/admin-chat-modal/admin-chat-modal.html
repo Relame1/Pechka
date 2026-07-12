@@ -1,0 +1,60 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-info">
+        <h3>Чат с клиентом</h3>
+        <p class="user-info">{{ conversation?.userName }} ({{ conversation?.userEmail }})</p>
+      </div>
+      <div class="header-actions">
+        <button class="delete-conversation-btn" (click)="deleteConversation()" [disabled]="isDeleting" title="Завершить переписку">
+          {{ isDeleting ? 'Удаление...' : 'Завершить' }}
+        </button>
+        <button class="close-btn" (click)="onClose()">✕</button>
+      </div>
+    </div>
+    
+    <div class="modal-body">
+      <div class="chat-messages" #messagesContainer>
+        <!-- Индикатор загрузки -->
+        <div *ngIf="isLoading && messages.length === 0" class="loading-chat">
+          <div class="spinner"></div>
+          <p>Загрузка сообщений...</p>
+        </div>
+        
+        <!-- Пустой чат -->
+        <div *ngIf="!isLoading && messages.length === 0" class="empty-chat">
+          <div class="empty-icon">💬</div>
+          <p>Нет сообщений</p>
+          <small>Напишите что-нибудь клиенту</small>
+        </div>
+        
+        <!-- Сообщения -->
+        <div *ngFor="let msg of messages" class="message-item" [class.admin-message]="isAdminMessage(msg)">
+          <div class="message-header">
+            <span class="message-user">{{ msg.user_name }}</span>
+            <span class="message-time">{{ formatTime(msg.created_at) }}</span>
+          </div>
+          <div class="message-text">{{ msg.message }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <div class="chat-input">
+        <textarea 
+          [(ngModel)]="replyMessage" 
+          placeholder="Введите ответ..."
+          rows="2"
+          (keydown.enter)="onEnterPress()"
+          (input)="autoResize($event)"
+          class="message-input"></textarea>
+        <button class="send-btn" (click)="sendReply()" [disabled]="!replyMessage.trim() || isLoading || isDeleting">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

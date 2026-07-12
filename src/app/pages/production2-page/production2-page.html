@@ -1,0 +1,129 @@
+<section class="production2-page">
+  <header class="page-header">
+    <div>
+      <h1>Производство (пекарь)</h1>
+      <p>Управление задачами, печами и ингредиентами</p>
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="loading-spinner">Загрузка данных...</div>
+
+  <div *ngIf="!loading">
+    <!-- Канбан-доска -->
+    <div class="kanban-section">
+      <h2>Производственные задачи</h2>
+      <div class="kanban-grid">
+        <div *ngFor="let col of kanbanColumns" class="kanban-col">
+          <div class="kanban-head" [ngClass]="getStatusClass(col)">
+            <h3>{{ columnLabels[col] }}</h3>
+            <span class="count">{{ getTasksByStatus(col).length }}</span>
+          </div>
+          <div class="kanban-cards">
+            <div class="kanban-card" *ngFor="let task of getTasksByStatus(col)">
+              <div class="card-title">{{ task.productName }}</div>
+              <div class="card-meta">
+                <span>Заказ: {{ task.orderCode }}</span>
+                <span>{{ task.quantity }} {{ task.unit }}</span>
+              </div>
+              <div class="card-footer" *ngIf="task.assignedTo">👤 {{ task.assignedTo }}</div>
+              <div class="card-actions">
+                <button *ngIf="canMovePrev(task.status)" (click)="moveTask(task, getPrevStatus(task.status)!)" class="action-btn">◀ Назад</button>
+                <button *ngIf="canMoveNext(task.status)" (click)="moveTask(task, getNextStatus(task.status)!)" class="action-btn">Далее ▶</button>
+              </div>
+            </div>
+            <div class="kanban-empty" *ngIf="getTasksByStatus(col).length === 0">Нет задач</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Печи -->
+    <div class="ovens-section">
+      <h2>Печи</h2>
+      <div class="ovens-grid">
+        <div class="oven-card" *ngFor="let oven of ovens">
+          <div class="oven-header">
+            <span class="oven-name">{{ oven.name }}</span>
+            <span class="oven-temp">{{ oven.temperature }}°C</span>
+          </div>
+          <div class="oven-task">
+            <span class="label">Сейчас:</span>
+            <span class="value" [class.free]="!oven.currentTask">
+              {{ oven.currentTask?.productName || 'Свободна' }}
+            </span>
+          </div>
+          <div class="oven-timer" *ngIf="oven.currentTask && oven.remainingSeconds != null && oven.totalSeconds != null">
+            <div class="timer-bar">
+              <div class="timer-fill" [style.width.%]="((oven.totalSeconds - oven.remainingSeconds) / oven.totalSeconds) * 100"></div>
+            </div>
+            <span class="timer-text">Осталось: {{ formatRemaining(oven.remainingSeconds ?? undefined) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Остывающие продукты -->
+    <div class="cooling-section">
+      <h2>Остывание (10 минут)</h2>
+      <div class="cooling-grid">
+        <div class="cooling-card" *ngFor="let task of getTasksByStatus('cooling')">
+          <div class="cooling-header">
+            <span class="cooling-name">{{ task.productName }}</span>
+            <span class="cooling-order">{{ task.orderCode }}</span>
+          </div>
+          <div class="cooling-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="((task.coolingRemainingSeconds ?? 0) / 600) * 100"></div>
+            </div>
+            <span class="cooling-time">{{ formatRemaining(task.coolingRemainingSeconds) }}</span>
+          </div>
+        </div>
+        <div *ngIf="getTasksByStatus('cooling').length === 0" class="cooling-empty">
+          Нет продуктов на остывании
+        </div>
+      </div>
+    </div>
+
+    <!-- Ингредиенты -->
+    <div class="ingredients-section">
+      <h2>Необходимые ингредиенты (на активные задачи)</h2>
+      <div class="ingredients-grid">
+        <div class="ingredient-item" *ngFor="let ing of ingredients">
+          <div class="ingredient-name">{{ ing.name }}</div>
+          <div class="ingredient-stats">
+            <span class="needed">Нужно: {{ ing.needed }} {{ ing.unit }}</span>
+            <span class="available">В наличии: {{ ing.available }} {{ ing.unit }}</span>
+          </div>
+          <div class="stock-bar">
+            <div class="stock-fill" [style.width.%]="(ing.available / ing.needed) * 100" [ngClass]="getStockClass(ing.needed, ing.available)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div class="notifications-section" id="notifications">
+      <h2>Уведомления</h2>
+      <div class="notifications-list">
+        <div class="notification-item" *ngFor="let notif of notifications" [ngClass]="getNotificationClass(notif.type)" (click)="markAsRead(notif)">
+          <div class="notif-content">
+            <span class="notif-message">{{ notif.message }}</span>
+            <span class="notif-time">{{ notif.timestamp | date:'HH:mm' }}</span>
+          </div>
+          <div class="notif-badge" *ngIf="!notif.read">Новое</div>
+        </div>
+        <div class="empty-notifications" *ngIf="notifications.length === 0">Нет уведомлений</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно настройки выпечки -->
+  <app-baking-settings-modal
+    [visible]="showBakingModal"
+    [productName]="selectedTaskForBaking?.productName || ''"
+    [defaultTemperature]="defaultBakingTemp"
+    [defaultTimeMinutes]="defaultBakingTime"
+    (close)="closeBakingModal()"
+    (confirm)="onBakingConfirm($event)">
+  </app-baking-settings-modal>
+</section>

@@ -1,0 +1,52 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ product?.name ?? 'Продукт' }}</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body" *ngIf="product">
+      <p><strong>Артикул:</strong> {{ product.article }}</p>
+      <p><strong>Категория:</strong> {{ product.category }}</p>
+      <p><strong>Цена:</strong> {{ product.price | number:'1.0-0' }} ₽ / {{ product.unit }}</p>
+      
+      <p>
+        <strong>Статус:</strong> 
+        <span class="status-badge" 
+              [class.in-stock]="product.in_stock"
+              [class.out-of-stock]="!product.in_stock">
+          {{ product.in_stock ? 'В наличии' : 'Нет в наличии' }}
+        </span>
+      </p>
+
+      <p *ngIf="product.description">
+        <strong>Описание:</strong><br>
+        {{ product.description }}
+      </p>
+
+      <div class="ingredients-section">
+        <strong>Состав продукта:</strong>
+        
+        <div *ngIf="loadingIngredients" class="ingredients-loading">
+          Загрузка состава...
+        </div>
+        
+        <div *ngIf="!loadingIngredients && (fullProduct?.ingredients?.length ?? 0) === 0" class="ingredients-empty">
+          Состав не указан
+        </div>
+        
+        <ul *ngIf="!loadingIngredients && (fullProduct?.ingredients?.length ?? 0) > 0" class="ingredients-list">
+          <li *ngFor="let ing of fullProduct?.ingredients ?? []">
+            {{ ing.name }} – 
+            {{ ing.pivot.quantity }} {{ ing.pivot.unit }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="edit-btn" (click)="onEdit()">Изменить</button>
+      <button class="close-footer-btn" (click)="closeModal()">Закрыть</button>
+    </div>
+  </div>
+</div>

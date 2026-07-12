@@ -1,0 +1,140 @@
+<section class="orders-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Управление</p>
+      <h1>Заказы</h1>
+    </div>
+    <button class="primary-btn" routerLink="/orders/new">
+      + Новый заказ
+    </button>
+  </header>
+
+  <!-- Статистика -->
+  <div *ngIf="!loadingSummary && summary; else summarySkeleton" class="stats-grid">
+    <div class="stat-card">
+      <span>Всего заказов сегодня</span>
+      <strong>{{ summary.total_today }}</strong>
+      <small>На сумму {{ summary.total_amount_today | number:'1.0-0' }} ₽</small>
+    </div>
+    <div class="stat-card">
+      <span>Новые</span>
+      <strong>{{ summary.new }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>В работе</span>
+      <strong>{{ summary.in_progress }}</strong>
+    </div>
+    <div class="stat-card dark">
+      <span>Завершено</span>
+      <strong>{{ summary.completed }}</strong>
+    </div>
+  </div>
+
+  <ng-template #summarySkeleton>
+    <div class="stats-grid">
+      <div class="stat-card skeleton" *ngFor="let _ of [1,2,3,4]">
+        <span class="skeleton-line w-30"></span>
+        <strong class="skeleton-line w-50"></strong>
+        <small class="skeleton-line w-70"></small>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Панель с фильтрами и таблицей -->
+  <div class="panel">
+    <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filters">
+      <select formControlName="status">
+        <option value="">Все статусы</option>
+        <option value="Новый">Новый</option>
+        <option value="Готовится">Готовится</option>
+        <option value="Доставляется">Доставляется</option>
+        <option value="Завершён">Завершён</option>
+      </select>
+
+      <select formControlName="delivery">
+        <option value="">Все типы</option>
+        <option value="Доставка">Доставка</option>
+        <option value="Самовывоз">Самовывоз</option>
+      </select>
+
+      <input type="text" formControlName="q" placeholder="Поиск по коду, клиенту, адресу" />
+
+      <button type="submit" class="primary-btn" [disabled]="loading">
+        Применить
+      </button>
+    </form>
+
+    <div *ngIf="error" class="notice error">
+      <span>{{ error }}</span>
+      <button class="ghost-btn" (click)="retryLoad()">Повторить</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Код</th><th>Клиент</th><th>Источник</th>
+            <th>Тип</th><th>Статус</th><th>Производство</th>
+            <th>Срок</th><th>Сумма</th><th>Действия</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="!loading && filteredOrders.length > 0; else tableEmptyOrLoading">
+          <tr *ngFor="let order of filteredOrders">
+            <td class="code">{{ order.code }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td>{{ order.source }}</td>
+            <td>{{ order.delivery_type }}</td>
+            <td>
+              <span class="status-pill" [ngClass]="getStatusClass(order.status)">
+                {{ order.status }}
+              </span>
+            </td>
+            <td>{{ order.production_status }}</td>
+            <td>{{ order.due_at | date:'dd.MM.yyyy HH:mm' }}</td>
+            <td class="amount">{{ order.amount | number:'1.0-0' }} ₽</td>
+            <td class="actions">
+              <button class="action-btn details-btn" (click)="openOrderDetails(order)">Подробнее</button>
+            </td>
+          </tr>
+        </tbody>
+
+        <ng-template #tableEmptyOrLoading>
+          <tbody>
+            <tr *ngIf="loading; else emptyState">
+              <td *ngFor="let _ of skeletonRows; let i = index">
+                <span class="skeleton-line" [style.width.%]="randomWidth(i)"></span>
+              </td>
+            </tr>
+            <ng-template #emptyState>
+              <tr>
+                <td colspan="9" class="empty-message">
+                  Заказов, соответствующих фильтрам, не найдено.
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+        </ng-template>
+      </table>
+    </div>
+  </div>
+
+  <!-- Модальное окно деталей заказа -->
+  <app-order-details-modal
+    [order]="selectedOrder"
+    [visible]="showModal"
+    (close)="closeModal()"
+    (edit)="editOrder($event)"
+    (complete)="completeOrder($event)"
+    (delete)="deleteOrderFromModal($event)">
+  </app-order-details-modal>
+
+  <!-- Модальное окно редактирования заказа -->
+  <app-order-edit-modal
+    [order]="editOrderData"
+    [visible]="showEditModal"
+    [loading]="isUpdatingOrder"
+    (close)="closeEditModal()"
+    (save)="updateOrder($event)">
+  </app-order-edit-modal>
+</section>

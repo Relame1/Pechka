@@ -1,0 +1,192 @@
+<section class="add-product-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Каталог</p>
+      <h1>Новый продукт</h1>
+    </div>
+    <a routerLink="/products" class="ghost-btn">← Назад к продуктам</a>
+  </header>
+
+  <div class="form-container">
+    <div class="form-panel" [formGroup]="form">
+      <div class="form-grid">
+        <!-- Артикул -->
+        <label class="field">
+          <span>Артикул</span>
+          <input
+            type="text"
+            formControlName="article"
+            placeholder="Например: HB-0001"
+            [class.invalid]="submitted && form.get('article')?.invalid"
+          />
+          <small *ngIf="submitted && form.get('article')?.errors?.['required']" class="error">Обязательное поле</small>
+          <small *ngIf="submitted && form.get('article')?.errors?.['pattern']" class="error">Формат: XX-0000</small>
+        </label>
+
+        <!-- Название -->
+        <label class="field">
+          <span>Название продукта</span>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Например: Чиабатта с оливками"
+            [class.invalid]="submitted && form.get('name')?.invalid"
+          />
+          <small *ngIf="submitted && form.get('name')?.errors?.['required']" class="error">Обязательное поле</small>
+        </label>
+
+        <!-- Категория -->
+        <label class="field">
+          <span>Категория</span>
+          <select formControlName="category" [class.invalid]="submitted && form.get('category')?.invalid">
+            <option value="">Выберите категорию</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+          <small *ngIf="submitted && form.get('category')?.errors?.['required']" class="error">Обязательное поле</small>
+        </label>
+
+        <!-- Цена -->
+        <label class="field">
+          <span>Цена (₽)</span>
+          <input
+            type="number"
+            formControlName="price"
+            placeholder="150"
+            [class.invalid]="submitted && form.get('price')?.invalid"
+          />
+          <small *ngIf="submitted && form.get('price')?.errors?.['required']" class="error">Введите цену</small>
+          <small *ngIf="submitted && form.get('price')?.errors?.['min']" class="error">Минимум 1 ₽</small>
+        </label>
+
+        <!-- Время приготовления -->
+        <label class="field">
+          <span>Время приготовления (мин)</span>
+          <input
+            type="number"
+            formControlName="prep_time"
+            placeholder="30"
+            min="1"
+          />
+        </label>
+
+        <!-- Калорийность -->
+        <label class="field">
+          <span>Калорийность (ккал)</span>
+          <input
+            type="number"
+            formControlName="calories"
+            placeholder="250"
+            min="0"
+          />
+        </label>
+
+        <!-- Изображение -->
+        <label class="field full">
+          <span>Изображение продукта</span>
+          <div class="image-upload-area">
+            <div class="image-preview" *ngIf="imagePreview">
+              <img [src]="imagePreview" alt="Превью">
+              <button type="button" class="remove-image-btn" (click)="removeImage()">✕</button>
+            </div>
+            
+            <div class="upload-placeholder" *ngIf="!imagePreview">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+                <line x1="12" y1="9" x2="12" y2="17"/>
+                <line x1="8" y1="13" x2="16" y2="13"/>
+              </svg>
+              <p>Нажмите или перетащите изображение</p>
+              <small>PNG, JPG, JPEG до 2MB</small>
+            </div>
+            
+            <input
+              type="file"
+              #imageInput
+              accept="image/jpeg,image/png,image/jpg"
+              (change)="onImageSelected($event)"
+              style="display: none"
+            />
+            <button type="button" class="upload-btn" (click)="triggerFileInput()">
+              Выбрать изображение
+            </button>
+            
+            <div class="image-hint" *ngIf="!imagePreview">
+              <small>Рекомендуемый размер: 400x400 пикселей (квадратное)</small>
+            </div>
+          </div>
+        </label>
+
+        <!-- В наличии -->
+        <label class="field checkbox-field">
+          <input type="checkbox" formControlName="in_stock"/>
+          <span>В наличии</span>
+        </label>
+
+        <!-- Описание -->
+        <label class="field full">
+          <span>Описание</span>
+          <textarea
+            formControlName="description"
+            placeholder="Краткое описание продукта..."
+            rows="3"
+            [class.invalid]="submitted && form.get('description')?.invalid"
+          ></textarea>
+          <small *ngIf="submitted && form.get('description')?.errors?.['maxlength']" class="error">Максимум 300 символов</small>
+        </label>
+
+        <!-- Ингредиенты (выбор из базы) -->
+        <div class="field full ingredients-section">
+          <span>Состав продукта</span>
+          <div *ngIf="loadingIngredients" class="loading-hint">Загрузка ингредиентов...</div>
+          <div formArrayName="ingredients">
+            <div
+              class="ingredient-row"
+              *ngFor="let ing of ingredients.controls; let i = index"
+              [formGroupName]="i"
+            >
+              <select
+                class="ing-name"
+                formControlName="ingredient_id"
+                [class.invalid]="submitted && ing.get('ingredient_id')?.invalid"
+                (change)="onIngredientChange(i, $event)"
+              >
+                <option value="">Выберите ингредиент</option>
+                <option *ngFor="let ingredient of allIngredients" [value]="ingredient.id">
+                  {{ ingredient.name }} ({{ ingredient.category }})
+                </option>
+              </select>
+              <input
+                type="number"
+                formControlName="quantity"
+                placeholder="Кол-во"
+                class="ing-qty"
+                step="0.1"
+                min="0.1"
+                [class.invalid]="submitted && ing.get('quantity')?.invalid"
+              />
+              <span class="ing-unit">{{ ing.get('unit')?.value }}</span>
+              <button type="button" class="remove-btn" (click)="removeIngredient(i)" title="Удалить">×</button>
+              <small *ngIf="submitted && ing.get('ingredient_id')?.errors?.['required']" class="error">Выберите ингредиент</small>
+              <small *ngIf="submitted && ing.get('quantity')?.errors?.['required']" class="error">Укажите количество</small>
+            </div>
+          </div>
+          <button type="button" class="add-ingredient-btn" (click)="addIngredient()">+ Добавить ингредиент</button>
+        </div>
+      </div>
+
+      <!-- Уведомление об успехе -->
+      <div *ngIf="success" class="notice success">
+        Продукт успешно добавлен! Перенаправление...
+      </div>
+
+      <!-- Кнопки -->
+      <div class="form-actions">
+        <button type="submit" class="primary-btn" (click)="onSubmit()" [disabled]="success || isLoading">
+          {{ isLoading ? 'Сохранение...' : 'Сохранить продукт' }}
+        </button>
+        <a routerLink="/products" class="ghost-btn">Отмена</a>
+      </div>
+    </div>
+  </div>
+</section>

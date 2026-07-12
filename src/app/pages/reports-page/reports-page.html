@@ -1,0 +1,171 @@
+<section class="reports-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Аналитика</p>
+      <h1>Отчёты</h1>
+    </div>
+    <div class="header-actions">
+      <div class="date-filters">
+        <input type="date" [(ngModel)]="dateFrom" (change)="onDateChange()" />
+        <span>–</span>
+        <input type="date" [(ngModel)]="dateTo" (change)="onDateChange()" />
+      </div>
+      <button class="primary-btn" (click)="exportReport('pdf')" [disabled]="isExporting">
+  {{ isExporting ? 'Экспорт...' : 'Экспорт PDF' }}
+      </button>
+      <button class="ghost-btn" (click)="exportReport('excel')" [disabled]="isExporting">
+  {{ isExporting ? 'Экспорт...' : 'Экспорт Excel' }}
+</button>
+    </div>
+  </header>
+
+  <nav class="report-nav">
+    <button *ngFor="let type of reportTypes" [class.active]="activeReport === type.key" (click)="selectReport(type.key)">
+      {{ type.label }}
+    </button>
+  </nav>
+
+  <div class="report-content" *ngIf="!loading; else loadingBlock">
+    <div class="report-meta">
+      <h2>{{ activeData.title }}</h2>
+      <span class="updated">Обновлено: {{ activeData.updatedAt }}</span>
+    </div>
+
+    <div class="summary-cards">
+      <div class="summary-card" *ngFor="let card of activeData.summaryCards">
+        <span class="card-label">{{ card.label }}</span>
+        <strong class="card-value">{{ card.value }}</strong>
+        <small class="card-change">{{ card.change }}</small>
+      </div>
+    </div>
+
+    <div class="chart-area">
+<!-- Продажи: линейный график -->
+<div class="panel chart-panel" *ngIf="activeReport === 'sales'">
+  <h3>Динамика выручки</h3>
+  <div class="chart-container" *ngIf="salesChartData.length > 0; else lineSkeleton">
+    <div class="chart-y-axis">
+      <div class="y-label">Выручка, ₽</div>
+      <div class="y-tick" *ngFor="let tick of getYTicks()">{{ tick }}</div>
+    </div>
+    <div class="chart-main">
+      <svg viewBox="0 0 600 200" class="line-svg" preserveAspectRatio="xMidYMid meet">
+        <g transform="translate(30, 10)">
+          <polyline *ngIf="salesChartData.length > 1" [attr.points]="getChartPoints()" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          <g *ngFor="let point of salesChartData; let i = index">
+            <ng-container *ngIf="getCirclePositions()[i] as pos">
+              <circle 
+                [attr.cx]="pos.cx" 
+                [attr.cy]="pos.cy" 
+                r="4" 
+                fill="#3b82f6" 
+                stroke="#fff" 
+                stroke-width="2" 
+              />
+              <text 
+                [attr.x]="pos.cx" 
+                [attr.y]="pos.cy - 10" 
+                text-anchor="middle" 
+                font-size="9" 
+                fill="#18181b" 
+                font-weight="600">
+                {{ formatRevenue(point.revenue) }}
+              </text>
+            </ng-container>
+          </g>
+        </g>
+      </svg>
+      <div class="chart-x-axis">
+        <div class="x-label">Дата</div>
+        <div class="x-ticks">
+          <span *ngFor="let point of salesChartData" class="x-tick">{{ point.displayDate }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <!-- Заказы: круговая диаграмма -->
+      <div class="panel chart-panel" *ngIf="activeReport === 'orders'">
+        <h3>Распределение статусов</h3>
+        <div class="donut-container" *ngIf="statusDistribution.length > 0; else donutSkeleton">
+          <div class="donut" [style.background]="getConicGradient()"><div class="donut-hole">{{ statusDistribution.reduce((sum, s) => sum + s.count, 0) }}</div></div>
+          <ul class="legend"><li *ngFor="let s of statusDistribution"><span class="dot" [style.background]="s.color"></span>{{ s.status }} — {{ s.percent }}% ({{ s.count }})</li></ul>
+        </div>
+      </div>
+
+    <!-- Продукты: горизонтальные бары -->
+<div class="panel chart-panel" *ngIf="activeReport === 'products'">
+  <h3>Топ продуктов</h3>
+  <div class="horizontal-bars" *ngIf="topProducts.length > 0; else listSkeleton">
+    <div class="h-bar-item" *ngFor="let p of topProducts">
+      <span class="h-bar-label">{{ p.name }}</span>
+      <div class="h-bar-track">
+        <div class="h-bar-fill" [style.width.%]="(p.sold / topProducts[0].sold) * 100">
+          {{ p.sold }} шт
+        </div>
+      </div>
+      <span class="h-bar-value">{{ p.revenue | number:'1.0-0' }} ₽</span>
+    </div>
+  </div>
+</div>
+
+<!-- Клиенты: столбцы -->
+<div class="panel chart-panel" *ngIf="activeReport === 'customers'">
+  <h3>Топ клиентов по потраченной сумме</h3>
+  <div class="bar-chart" *ngIf="topCustomers.length > 0">
+    <div class="bar-item" *ngFor="let c of topCustomers.slice(0, 10)">
+      <div class="bar-value">{{ (c.spent / 1000).toFixed(1) }}k ₽</div>
+      <div class="bar" [style.height.%]="(c.spent / topCustomers[0].spent) * 100"></div>
+      <div class="bar-label">{{ c.name.length > 12 ? (c.name.slice(0, 10) + '...') : c.name }}</div>
+    </div>
+  </div>
+  <div class="empty-data" *ngIf="topCustomers.length === 0">
+    Нет данных о клиентах за выбранный период
+  </div>
+</div>
+
+<!-- Производство -->
+<div class="panel chart-panel" *ngIf="activeReport === 'production'">
+  <h3>Выполнение плана по цехам</h3>
+  <div class="horizontal-bars" *ngIf="productionData.tableRows.length > 0; else listSkeleton">
+    <div class="h-bar-item" *ngFor="let row of productionData.tableRows">
+      <span class="h-bar-label">{{ row[0] }}</span>
+      <div class="h-bar-track">
+        <div class="h-bar-fill" [style.width.%]="(+row[1] / +row[2]) * 100">
+          {{ ((+row[1] / +row[2]) * 100).toFixed(0) }}%
+        </div>
+      </div>
+      <span class="h-bar-value">{{ row[1] }} / {{ row[2] }} {{ row[3] }}</span>
+    </div>
+  </div>
+</div>
+
+      <!-- Финансы -->
+      <div class="panel chart-panel" *ngIf="activeReport === 'finance'">
+        <h3>Доходы и расходы</h3>
+        <div class="bar-chart" *ngIf="financeData.summaryCards.length >= 2; else listSkeleton">
+          <div class="bar-item"><div class="bar-value">{{ getFinanceIncome() }}k</div><div class="bar" [style.height.%]="100"></div><div class="bar-label">Доход</div></div>
+          <div class="bar-item"><div class="bar-value">{{ getFinanceExpense() }}k</div><div class="bar" [style.height.%]="getFinanceExpensePercent()" style="background: #71717a;"></div><div class="bar-label">Расход</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel table-panel">
+      <h3>Детальные данные</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th *ngFor="let header of activeData.tableHeaders">{{ header }}</th></tr></thead>
+          <tbody><tr *ngFor="let row of activeData.tableRows"><td *ngFor="let cell of row">{{ cell }}</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loadingBlock>
+    <div class="skeleton-block"><div class="skeleton-line w-30"></div><div class="skeleton-line w-50"></div><div class="skeleton-line" *ngFor="let _ of skeletonCards"></div></div>
+  </ng-template>
+  <ng-template #listSkeleton><div class="skeleton-lines"><div class="skeleton-line" *ngFor="let _ of [1,2,3,4,5]"></div></div></ng-template>
+  <ng-template #lineSkeleton><div class="skeleton-chart" style="height: 180px;"></div></ng-template>
+  <ng-template #donutSkeleton><div class="skeleton-chart" style="height: 120px;"></div></ng-template>
+</section>

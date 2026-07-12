@@ -1,0 +1,123 @@
+<div class="about-page">
+  <app-client-header></app-client-header>
+  
+  <!-- Герой-секция -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">О нашей <span class="highlight">пекарне</span></h1>
+      <p class="hero-subtitle">История, традиции и любовь к своему делу</p>
+    </div>
+  </section>
+
+  <!-- Наша история -->
+  <section class="history-section">
+    <div class="container">
+      <div class="history-grid">
+        <div class="history-content">
+          <div class="section-badge">Наша история</div>
+          <h2>Как всё <span class="highlight">начиналось</span></h2>
+          <p>В 2014 году мы открыли маленькую пекарню в центре города с одной единственной целью — дарить людям радость через свежую, ароматную выпечку. Начинали с небольшой команды из 3 человек, а сегодня нас уже более 50!</p>
+          <p>За 10 лет работы мы выросли из маленькой пекарни в сеть из 5 точек и собственную службу доставки. Но главное осталось неизменным — мы по-прежнему печём с душой и используем только натуральные ингредиенты.</p>
+          <p>Каждое утро в 4 часа наша команда уже на ногах, чтобы к 8 утра вы могли насладиться свежей, ароматной выпечкой. Мы верим, что настоящий хлеб должен быть не только вкусным, но и полезным.</p>
+        </div>
+        <div class="history-image">
+          <div class="history-img-card"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Наши ценности -->
+  <section class="values-section">
+    <div class="container">
+      <div class="section-badge centered">Наши ценности</div>
+      <h2 class="section-title">Что для нас <span class="highlight">важно</span></h2>
+      
+      <div class="values-grid">
+        <div class="value-card" *ngFor="let value of values">
+          <div class="value-icon">{{ value.icon }}</div>
+          <h3>{{ value.title }}</h3>
+          <p>{{ value.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Команда -->
+  <section class="team-section">
+    <div class="container">
+      <div class="section-badge centered">Наша команда</div>
+      <h2 class="section-title">Люди, которые создают <span class="highlight">вкус</span></h2>
+      <p class="section-subtitle">Профессионалы своего дела, любящие свою работу</p>
+      
+      <div class="team-grid">
+        <div class="team-card" *ngFor="let member of teamMembers">
+          <div class="team-icon">{{ member.icon }}</div>
+          <h3>{{ member.name }}</h3>
+          <div class="team-position">{{ member.position }}</div>
+          <div class="team-experience">Опыт: {{ member.experience }}</div>
+          <p class="team-description">{{ member.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Вехи развития -->
+  <section class="milestones-section">
+    <div class="container">
+      <div class="section-badge centered">Вехи развития</div>
+      <h2 class="section-title">Наш путь к <span class="highlight">успеху</span></h2>
+      
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let milestone of milestones; let i = index">
+          <div class="timeline-dot"></div>
+          <div class="timeline-year">{{ milestone.year }}</div>
+          <div class="timeline-content">
+            <h3>{{ milestone.title }}</h3>
+            <p>{{ milestone.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Факты -->
+  <section class="facts-section">
+    <div class="container">
+      <div class="facts-grid">
+        <div class="fact-card">
+          <div class="fact-number">10+</div>
+          <div class="fact-label">лет опыта</div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-number">50+</div>
+          <div class="fact-label">видов выпечки</div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-number">5000+</div>
+          <div class="fact-label">довольных клиентов</div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-number">5</div>
+          <div class="fact-label">точек в городе</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Свяжитесь с нами -->
+  <section class="contact-banner">
+    <div class="container">
+      <div class="banner-content">
+        <h2>Приходите к нам в гости!</h2>
+        <p>Попробуйте нашу свежую выпечку и убедитесь сами</p>
+        <a routerLink="/client#contact" class="btn-primary">Связаться с нами</a>
+      </div>
+    </div>
+  </section>
+
+  <app-client-footer></app-client-footer>
+  <app-client-cart></app-client-cart>
+  <app-client-chat></app-client-chat>
+</div>

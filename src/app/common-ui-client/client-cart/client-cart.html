@@ -1,0 +1,80 @@
+<div class="cart-sidebar" [class.open]="showCart">
+  <div class="cart-header">
+    <h3>Корзина</h3>
+    <button class="close-cart" (click)="closeCart()">✕</button>
+  </div>
+  
+  <div class="cart-body" *ngIf="cart.length > 0; else emptyCart">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cart; let i = index">
+        <div class="cart-item-info">
+          <div class="cart-item-name">{{ item.product.name }}</div>
+          <div class="cart-item-price">{{ item.product.price | number:'1.0-0' }} ₽ × {{ item.quantity }}</div>
+        </div>
+        <div class="cart-item-actions">
+          <div class="quantity-control">
+            <button class="qty-btn" (click)="updateQuantity(i, item.quantity - 1)">-</button>
+            <span class="qty-value">{{ item.quantity }}</span>
+            <button class="qty-btn" (click)="updateQuantity(i, item.quantity + 1)">+</button>
+          </div>
+          <button class="remove-item" (click)="removeFromCart(i)">🗑</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cart-total">
+      <span>Итого:</span>
+      <strong>{{ getCartTotal() | number:'1.0-0' }} ₽</strong>
+    </div>
+    
+    <!-- Форма заказа -->
+    <div class="order-form-inline">
+      <h4>Данные для заказа</h4>
+      
+      <div class="form-group">
+        <input type="text" class="form-input" placeholder="Ваше имя *" [(ngModel)]="customerName">
+      </div>
+      
+      <div class="form-group">
+        <input type="tel" class="form-input" placeholder="Телефон" [(ngModel)]="customerPhone">
+      </div>
+      
+      <div class="form-group">
+        <select class="form-select" [(ngModel)]="deliveryType">
+          <option value="Самовывоз">Самовывоз</option>
+          <option value="Доставка">Доставка</option>
+        </select>
+      </div>
+      
+      <div class="form-group" *ngIf="deliveryType === 'Доставка'">
+        <input type="text" class="form-input" placeholder="Адрес доставки *" [(ngModel)]="deliveryAddress">
+      </div>
+      
+      <div class="form-group">
+        <input type="datetime-local" class="form-input" [(ngModel)]="deliveryDate" [min]="getMinDate()">
+      </div>
+      
+      <div class="form-group">
+        <textarea class="form-textarea" rows="2" placeholder="Комментарий к заказу" [(ngModel)]="comment"></textarea>
+      </div>
+      
+      <button class="submit-order-btn" (click)="submitOrder()" [disabled]="isSubmittingOrder">
+        {{ isSubmittingOrder ? 'Оформление...' : 'Оформить заказ' }}
+      </button>
+      
+      <div *ngIf="orderSuccess" class="success-message">
+        ✅ Заказ успешно оформлен!
+      </div>
+    </div>
+  </div>
+  
+  <ng-template #emptyCart>
+    <div class="empty-cart">
+      <div class="empty-cart-emoji">🛒</div>
+      <p>Корзина пуста</p>
+      <a routerLink="/menu" class="continue-btn" (click)="closeCart()">Продолжить покупки</a>
+    </div>
+  </ng-template>
+</div>
+
+<div class="cart-overlay" *ngIf="showCart" (click)="closeCart()"></div>

@@ -1,0 +1,76 @@
+@import "fonts";
+@import "margins";
+
+body {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--light-color);
+    color: var(--dark-color);
+}
+
+:root {
+    --dark-color: #000000;
+    --light-color: #FFFFFF;
+    --primary-color: #AE7AFF;
+    --dark-hover-color: #161616
+}
+
+.product-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--dark-color);
+    display: inline;
+    font-size: 12px;
+    font-weight: 700;
+    height: 16px;
+}
+
+.btn {
+    width: 100%;
+    border:none;
+    background: var(--primary-color);
+    color: var(--dark-color);
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.h1 {
+   font-size: 48px;
+   line-height: 56px;
+   font-weight: 800; 
+}
+
+.h6 {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 800;
+}
+
+.subtitle {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.r-control-label {
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 16px;
+    display: block;
+}
+
+.r-input {
+    width: 100%;
+    margin-top: 8px;
+    display: block;
+    border: 1px solid var(--dark-color);
+    border-radius: 4px;
+    padding: 12px 20px;
+    background: var(--light-color);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 21px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--dark-color);
+}

@@ -1,0 +1,17 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Изменить количество продукта</h3>
+    <p><strong>{{ product?.name }}</strong> ({{ product?.article }})</p>
+    <label>
+      Количество ({{ product?.unit }}):
+      <input type="number" step="1" inputmode="numeric" [(ngModel)]="newStockValue" min="0" [disabled]="loading">
+    </label>
+    <div class="modal-actions">
+      <button class="primary-btn" (click)="onSave()" [disabled]="loading">
+        {{ loading ? 'Сохранение...' : 'Сохранить' }}
+      </button>
+      <button class="ghost-btn" (click)="onClose()" [disabled]="loading">Отмена</button>
+    </div>
+    <div *ngIf="loading" class="spinner"></div>
+  </div>
+</div>

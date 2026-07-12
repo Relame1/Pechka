@@ -1,0 +1,104 @@
+<section class="add-ingredient-page">
+  <header class="page-header">
+    <div>
+      <p class="kicker">Склад</p>
+      <h1>Новый ингредиент</h1>
+    </div>
+    <a routerLink="/warehouse" class="ghost-btn">← Назад к складу</a>
+  </header>
+
+  <div class="form-container">
+    <!-- Важно: formGroup должен быть здесь -->
+    <div class="form-panel" [formGroup]="form">
+      <div class="form-grid">
+        <!-- Название -->
+        <label class="field full">
+          <span>Название</span>
+          <input type="text" formControlName="name" placeholder="Мука пшеничная высший сорт"
+                 [class.invalid]="submitted && form.get('name')?.invalid">
+          <small *ngIf="submitted && form.get('name')?.errors?.['required']" class="error">Обязательное поле</small>
+        </label>
+
+        <!-- Категория -->
+        <label class="field">
+          <span>Категория</span>
+          <select formControlName="category" [class.invalid]="submitted && form.get('category')?.invalid">
+            <option value="">Выберите категорию</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+          <small *ngIf="submitted && form.get('category')?.errors?.['required']" class="error">Обязательное поле</small>
+        </label>
+
+        <!-- Единица измерения -->
+        <label class="field">
+          <span>Единица измерения</span>
+          <select formControlName="unit">
+            <option value="кг">кг</option>
+            <option value="г">г</option>
+            <option value="л">л</option>
+            <option value="шт">шт</option>
+            <option value="уп">уп</option>
+          </select>
+        </label>
+
+        <!-- Текущий остаток -->
+        <label class="field">
+          <span>Текущий остаток</span>
+          <input type="number" formControlName="stock" min="0" step="0.01"
+                 [class.invalid]="submitted && form.get('stock')?.invalid">
+          <small *ngIf="submitted && form.get('stock')?.errors?.['required']" class="error">Укажите количество</small>
+        </label>
+
+        <!-- Минимальный запас -->
+        <label class="field">
+          <span>Минимальный запас</span>
+          <input type="number" formControlName="min_stock" min="0" step="0.01"
+                 [class.invalid]="submitted && form.get('min_stock')?.invalid">
+          <small *ngIf="submitted && form.get('min_stock')?.errors?.['required']" class="error">Обязательное поле</small>
+        </label>
+
+        <!-- Цена за единицу -->
+        <label class="field">
+          <span>Цена за единицу (₽)</span>
+          <input type="number" formControlName="price_per_unit" placeholder="85.00" min="0.01" step="0.01"
+                 [class.invalid]="submitted && form.get('price_per_unit')?.invalid">
+          <small *ngIf="submitted && form.get('price_per_unit')?.errors?.['required']" class="error">Введите цену</small>
+        </label>
+
+        <!-- Дата последней поставки -->
+        <label class="field">
+          <span>Дата последней поставки</span>
+          <input type="date" formControlName="last_delivery"
+                 [class.invalid]="submitted && form.get('last_delivery')?.invalid">
+          <small *ngIf="submitted && form.get('last_delivery')?.errors?.['required']" class="error">Укажите дату</small>
+        </label>
+
+        <!-- Заметки -->
+        <label class="field full">
+          <span>Заметки</span>
+          <textarea formControlName="notes" rows="2" placeholder="Дополнительная информация..."></textarea>
+        </label>
+      </div>
+
+      <!-- Уведомления -->
+      <div *ngIf="success" class="notice success">
+        Ингредиент успешно добавлен! Перенаправление...
+      </div>
+      <div *ngIf="errorMessage" class="notice error">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Кнопки -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="primary-btn" 
+          (click)="onSubmit()" 
+          [disabled]="success || isLoading">
+          {{ isLoading ? 'Сохранение...' : 'Сохранить ингредиент' }}
+        </button>
+        <a routerLink="/warehouse" class="ghost-btn">Отмена</a>
+      </div>
+    </div>
+  </div>
+</section>

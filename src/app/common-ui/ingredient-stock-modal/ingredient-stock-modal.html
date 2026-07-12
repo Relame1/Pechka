@@ -1,0 +1,61 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Редактирование ингредиента</h3>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <label class="field full">
+          <span>Название *</span>
+          <input type="text" formControlName="name">
+          <small *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="error">Обязательное поле</small>
+        </label>
+
+        <label class="field">
+          <span>Категория *</span>
+          <select formControlName="category">
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Единица измерения *</span>
+          <select formControlName="unit">
+            <option *ngFor="let u of units" [value]="u">{{ u }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Текущий остаток *</span>
+          <input type="number" step="0.001" formControlName="stock">
+        </label>
+
+        <label class="field">
+          <span>Минимальный запас *</span>
+          <input type="number" step="0.001" formControlName="min_stock">
+        </label>
+
+        <label class="field">
+          <span>Цена за единицу (₽) *</span>
+          <input type="number" step="0.01" formControlName="price_per_unit">
+        </label>
+
+        <label class="field">
+          <span>Дата последней поставки</span>
+          <input type="date" formControlName="last_delivery">
+        </label>
+
+        <label class="field full">
+          <span>Заметки</span>
+          <textarea formControlName="notes" rows="2"></textarea>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="primary-btn" [disabled]="loading || form.invalid">
+          {{ loading ? 'Сохранение...' : 'Сохранить' }}
+        </button>
+        <button type="button" class="ghost-btn" (click)="onClose()" [disabled]="loading">Отмена</button>
+      </div>
+      <div *ngIf="loading" class="spinner"></div>
+    </form>
+  </div>
+</div>
